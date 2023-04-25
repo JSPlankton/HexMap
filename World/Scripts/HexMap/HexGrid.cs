@@ -16,18 +16,25 @@ namespace JS.HexMap
         HexCell[] cells;
         HexMesh hexMesh;
         Canvas gridCanvas;
+        
+        public Texture2D noiseSource;
 
 
         void Awake () {
             hexMesh = GetComponentInChildren<HexMesh>();
             gridCanvas = GetComponentInChildren<Canvas>();
             cells = new HexCell[height * width];
+            HexMetrics.noiseSource = noiseSource;
 
             for (int z = 0, i = 0; z < height; z++) {
                 for (int x = 0; x < width; x++) {
                     CreateCell(x, z, i++);
                 }
             }
+        }
+        
+        void OnEnable () {
+            HexMetrics.noiseSource = noiseSource;
         }
         
         void Start () {
@@ -70,6 +77,8 @@ namespace JS.HexMap
                 new Vector2(position.x, position.z);
             label.text = cell.coordinates.ToStringOnSeparateLines();
             cell.uiRect = label.rectTransform;
+            
+            cell.Elevation = 0;
         }
         
         public HexCell GetCell (Vector3 position) {
