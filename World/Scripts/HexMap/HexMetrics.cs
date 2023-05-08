@@ -39,6 +39,8 @@ namespace JS.HexMap
         public const float noiseScale = 0.003f;
         
         public const float elevationPerturbStrength = 1.5f;
+        
+        public const int chunkSizeX = 5, chunkSizeZ = 5;
 
         public static Vector4 SampleNoise (Vector3 position) {
             return noiseSource.GetPixelBilinear(
