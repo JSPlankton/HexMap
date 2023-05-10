@@ -7,7 +7,7 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
-    
+        
         //单元格颜色
         public Color Color {
             get {
@@ -45,6 +45,20 @@ namespace JS.HexMap
                 Vector3 uiPosition = uiRect.localPosition;
                 uiPosition.z = -position.y;
                 uiRect.localPosition = uiPosition;
+                
+                if (
+                    hasOutgoingRiver &&
+                    elevation < GetNeighbor(outgoingRiver).elevation
+                ) {
+                    RemoveOutgoingRiver();
+                }
+                if (
+                    hasIncomingRiver &&
+                    elevation > GetNeighbor(incomingRiver).elevation
+                ) {
+                    RemoveIncomingRiver();
+                }
+                
                 Refresh();
             }
         }
@@ -56,6 +70,127 @@ namespace JS.HexMap
                 return transform.localPosition;
             }
         }
+
+        #region 河流
+        //河流 流入流出   
+        bool hasIncomingRiver, hasOutgoingRiver;
+        //河流流向 流入流出
+        HexDirection incomingRiver, outgoingRiver;
+        public bool HasIncomingRiver {
+            get {
+                return hasIncomingRiver;
+            }
+        }
+
+        public bool HasOutgoingRiver {
+            get {
+                return hasOutgoingRiver;
+            }
+        }
+
+        public HexDirection IncomingRiver {
+            get {
+                return incomingRiver;
+            }
+        }
+
+        public HexDirection OutgoingRiver {
+            get {
+                return outgoingRiver;
+            }
+        }
+        
+        public bool HasRiver {
+            get {
+                return hasIncomingRiver || hasOutgoingRiver;
+            }
+        }
+        
+        public bool HasRiverBeginOrEnd {
+            get {
+                return hasIncomingRiver != hasOutgoingRiver;
+            }
+        }
+        
+        public float RiverSurfaceY {
+            get {
+                return
+                    (elevation + HexMetrics.riverSurfaceElevationOffset) *
+                    HexMetrics.elevationStep;
+            }
+        }
+        
+        public float StreamBedY {
+            get {
+                return
+                    (elevation + HexMetrics.streamBedElevationOffset) *
+                    HexMetrics.elevationStep;
+            }
+        }
+        
+        public bool HasRiverThroughEdge (HexDirection direction) {
+            return
+                hasIncomingRiver && incomingRiver == direction ||
+                hasOutgoingRiver && outgoingRiver == direction;
+        }
+        
+        public void RemoveOutgoingRiver () {
+            if (!hasOutgoingRiver) {
+                return;
+            }
+            hasOutgoingRiver = false;
+            RefreshSelfOnly();
+            
+            HexCell neighbor = GetNeighbor(outgoingRiver);
+            neighbor.hasIncomingRiver = false;
+            neighbor.RefreshSelfOnly();
+        }
+        
+        public void RemoveIncomingRiver () {
+            if (!hasIncomingRiver) {
+                return;
+            }
+            hasIncomingRiver = false;
+            RefreshSelfOnly();
+
+            HexCell neighbor = GetNeighbor(incomingRiver);
+            neighbor.hasOutgoingRiver = false;
+            neighbor.RefreshSelfOnly();
+        }
+        
+        public void RemoveRiver () {
+            RemoveOutgoingRiver();
+            RemoveIncomingRiver();
+        }
+        
+        public void SetOutgoingRiver (HexDirection direction) {
+            //当前方向已存在河流
+            if (hasOutgoingRiver && outgoingRiver == direction) {
+                return;
+            }
+            //当前方向存在单元格，河流不能向高处流动，判断高度
+            HexCell neighbor = GetNeighbor(direction);
+            if (!neighbor || elevation < neighbor.elevation) {
+                return;
+            }
+            //清除上一个流出方向的河流，且当流入方向与当前流出方向重叠时，清除流入方向河流
+            RemoveOutgoingRiver();
+            if (hasIncomingRiver && incomingRiver == direction) {
+                RemoveIncomingRiver();
+            }
+            //设置流出方向河流
+            hasOutgoingRiver = true;
+            outgoingRiver = direction;
+            RefreshSelfOnly();
+            
+            //相邻单元格上已经有流入方向的河流时，移除它并设置新的流入河流
+            neighbor.RemoveIncomingRiver();
+            neighbor.hasIncomingRiver = true;
+            neighbor.incomingRiver = direction.Opposite();
+            neighbor.RefreshSelfOnly();
+        }
+        
+        #endregion
 
         public HexCell GetNeighbor (HexDirection direction) {
             return neighbors[(int)direction];
@@ -90,6 +225,10 @@ namespace JS.HexMap
                     }
                 }
             }
+        }
+        
+        void RefreshSelfOnly () {
+            chunk.Refresh();
         }
         
     }
