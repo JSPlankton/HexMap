@@ -1,4 +1,4 @@
-Shader "JS/Env/River"
+Shader "JS/Env/Road"
 {
     Properties
     {
@@ -7,8 +7,9 @@ Shader "JS/Env/River"
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
-        LOD 200
+        Tags { "RenderType"="Opaque" "Queue"="Geometry+1" }
+		LOD 200
+		Offset -1, -1
         
         Blend SrcAlpha OneMinusSrcAlpha
 
@@ -29,8 +30,8 @@ Shader "JS/Env/River"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float2 uv2 : TEXCOORD1;
-                float4 vertex : SV_POSITION;
+                float3 posWS : TEXCOORD1;
+                float4 posCS : SV_POSITION;
             };
 
             sampler2D _MainTex;
@@ -43,26 +44,22 @@ Shader "JS/Env/River"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.posCS = UnityObjectToClipPos(v.vertex);
+                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.uv2 = o.uv;
-
-			    o.uv.x = o.uv.x * 0.0625 + _Time.y * 0.005;
-			    o.uv.y -= _Time.y * 0.25;
-
-                o.uv2.x = o.uv2.x * 0.0625 - _Time.y * 0.0052;
-			    o.uv2.y -= _Time.y * 0.23;
-
+                
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                half4 noise = tex2D(_MainTex, i.uv);
-                half4 noise2 = tex2D(_MainTex, i.uv2);
-                
-                half4 finalCol = saturate(_Color + (noise.r * noise2.a));
+                half4 noise = tex2D(_MainTex, i.posWS.xz * 0.025);
+                half blend = i.uv.x;
+                blend *= noise.x + 0.5;
+                blend = smoothstep(0.4, 0.7, blend);
+
+                _Color.a = blend;
+                half4 finalCol = _Color * (noise.y * 0.75 + 0.25);
                 
                 return finalCol;
             }
