@@ -15,6 +15,8 @@ namespace JS.HexMap
         public TextMeshProUGUI cellLabelPrefab;
         public HexGridChunk chunkPrefab;
         
+        public int seed;
+        
         HexCell[] cells;
         HexGridChunk[] chunks;
 
@@ -23,6 +25,7 @@ namespace JS.HexMap
 
         void Awake () {
             HexMetrics.noiseSource = noiseSource;
+            HexMetrics.InitializeHashGrid(seed);
 
             cellCountX = chunkCountX * HexMetrics.chunkSizeX;
             cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
@@ -53,7 +56,10 @@ namespace JS.HexMap
         }
         
         void OnEnable () {
-            HexMetrics.noiseSource = noiseSource;
+            if (!HexMetrics.noiseSource) {
+                HexMetrics.noiseSource = noiseSource;
+                HexMetrics.InitializeHashGrid(seed);
+            }
         }
 
         void CreateCell (int x, int z, int i) {
