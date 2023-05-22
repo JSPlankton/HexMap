@@ -48,18 +48,7 @@ namespace JS.HexMap
                 uiPosition.z = -position.y;
                 uiRect.localPosition = uiPosition;
                 
-                if (
-                    hasOutgoingRiver &&
-                    elevation < GetNeighbor(outgoingRiver).elevation
-                ) {
-                    RemoveOutgoingRiver();
-                }
-                if (
-                    hasIncomingRiver &&
-                    elevation > GetNeighbor(incomingRiver).elevation
-                ) {
-                    RemoveIncomingRiver();
-                }
+                ValidateRivers();
                 //如果单元格高度差过大，需要切断道路
                 for (int i = 0; i < roads.Length; i++) {
                     if (roads[i] && GetElevationDifference((HexDirection)i) > 1) {
@@ -72,6 +61,29 @@ namespace JS.HexMap
         }
         //海拔高度等级
         int elevation = int.MinValue;
+        
+        //水位高度
+        public int WaterLevel {
+            get {
+                return waterLevel;
+            }
+            set {
+                if (waterLevel == value) {
+                    return;
+                }
+                waterLevel = value;
+                ValidateRivers();
+                Refresh();
+            }
+        }
+	
+        int waterLevel;
+        
+        public bool IsUnderwater {
+            get {
+                return waterLevel > elevation;
+            }
+        }
         
         public Vector3 Position {
             get {
@@ -123,7 +135,15 @@ namespace JS.HexMap
         public float RiverSurfaceY {
             get {
                 return
-                    (elevation + HexMetrics.riverSurfaceElevationOffset) *
+                    (elevation + HexMetrics.waterElevationOffset) *
+                    HexMetrics.elevationStep;
+            }
+        }
+        
+        public float WaterSurfaceY {
+            get {
+                return
+                    (waterLevel + HexMetrics.waterElevationOffset) *
                     HexMetrics.elevationStep;
             }
         }
@@ -183,7 +203,7 @@ namespace JS.HexMap
             }
             //当前方向存在单元格，河流不能向高处流动，判断高度
             HexCell neighbor = GetNeighbor(direction);
-            if (!neighbor || elevation < neighbor.elevation) {
+            if (!IsValidRiverDestination(neighbor)) {
                 return;
             }
             //清除上一个流出方向的河流，且当流入方向与当前流出方向重叠时，清除流入方向河流
@@ -295,5 +315,25 @@ namespace JS.HexMap
             chunk.Refresh();
         }
         
+        void ValidateRivers () {
+            if (
+                hasOutgoingRiver &&
+                !IsValidRiverDestination(GetNeighbor(outgoingRiver))
+            ) {
+                RemoveOutgoingRiver();
+            }
+            if (
+                hasIncomingRiver &&
+                !GetNeighbor(incomingRiver).IsValidRiverDestination(this)
+            ) {
+                RemoveIncomingRiver();
+            }
+        }
+        
+        bool IsValidRiverDestination (HexCell neighbor) {
+            return neighbor && (
+                elevation >= neighbor.elevation || waterLevel == neighbor.elevation
+            );
+        }
     }
 }

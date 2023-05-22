@@ -1,4 +1,4 @@
-Shader "JS/Env/River"
+Shader "JS/Env/Water"
 {
     Properties
     {
@@ -7,8 +7,7 @@ Shader "JS/Env/River"
     }
     SubShader
     {
-        //河流始终在水体之上，这样瀑布效果才能正确
-        Tags { "RenderType"="Transparent" "Queue"="Transparent+1" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
         LOD 200
         
         Blend SrcAlpha OneMinusSrcAlpha
@@ -31,7 +30,8 @@ Shader "JS/Env/River"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+                float3 posWS : TEXCOORD1;
+                float4 posCS : SV_POSITION;
             };
 
             sampler2D _MainTex;
@@ -44,16 +44,18 @@ Shader "JS/Env/River"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
+                o.posCS = UnityObjectToClipPos(v.vertex);
+                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.uv = o.posWS.xz;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float river = River(i.uv, _MainTex);
-                half4 finalCol = saturate(_Color + river);
+                half waves = Waves(i.posWS.xz, _MainTex);
+                half4 color = saturate(_Color + waves);
+                
+                half4 finalCol = color;
                 
                 return finalCol;
             }

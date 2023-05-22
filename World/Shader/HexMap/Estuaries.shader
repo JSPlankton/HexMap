@@ -1,4 +1,4 @@
-Shader "JS/Env/River"
+Shader "JS/Env/Estuaries"
 {
     Properties
     {
@@ -7,8 +7,7 @@ Shader "JS/Env/River"
     }
     SubShader
     {
-        //河流始终在水体之上，这样瀑布效果才能正确
-        Tags { "RenderType"="Transparent" "Queue"="Transparent+1" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
         LOD 200
         
         Blend SrcAlpha OneMinusSrcAlpha
@@ -26,12 +25,15 @@ Shader "JS/Env/River"
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+                float2 uv2 : TEXCOORD1;
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+                float2 uv2 : TEXCOORD1;
+                float3 posWS : TEXCOORD2;
+                float4 posCS : SV_POSITION;
             };
 
             sampler2D _MainTex;
@@ -44,16 +46,26 @@ Shader "JS/Env/River"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.posCS = UnityObjectToClipPos(v.vertex);
+                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
+                o.uv2 = v.uv2;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float river = River(i.uv, _MainTex);
-                half4 finalCol = saturate(_Color + river);
+			    float shore = i.uv.y;
+			    float foam = Foam(shore, i.posWS.xz, _MainTex);
+			    float waves = Waves(i.posWS.xz, _MainTex);
+			    waves *= 1 - shore;
+
+                float shoreWater = max(foam, waves);
+			    float river = River(i.uv2, _MainTex);
+			    float water = lerp(shoreWater, river, i.uv.x);
+
+                
+                half4 finalCol = saturate(_Color + water);
                 
                 return finalCol;
             }

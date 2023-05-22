@@ -46,7 +46,11 @@ namespace JS.HexMap
         
         public const float streamBedElevationOffset = -1.75f;
 
-        public const float riverSurfaceElevationOffset = -0.5f;
+        public const float waterElevationOffset = -0.5f;
+        
+        public const float waterFactor = 0.6f;
+        
+        public const float waterBlendFactor = 1f - waterFactor;
 
         public static Vector4 SampleNoise (Vector3 position) {
             return noiseSource.GetPixelBilinear(
@@ -112,6 +116,19 @@ namespace JS.HexMap
             position.x += (sample.x * 2f - 1f) * HexMetrics.cellPerturbStrength;
             position.z += (sample.z * 2f - 1f) * HexMetrics.cellPerturbStrength;
             return position;
+        }
+        
+        public static Vector3 GetFirstWaterCorner (HexDirection direction) {
+            return corners[(int)direction] * waterFactor;
+        }
+
+        public static Vector3 GetSecondWaterCorner (HexDirection direction) {
+            return corners[(int)direction + 1] * waterFactor;
+        }
+        
+        public static Vector3 GetWaterBridge (HexDirection direction) {
+            return (corners[(int)direction] + corners[(int)direction + 1]) *
+                   waterBlendFactor;
         }
     }
 }
