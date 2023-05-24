@@ -24,7 +24,7 @@ namespace JS.HexMap
             Ignore, Yes, No
         }
 	
-        OptionalToggle riverMode, roadMode;
+        OptionalToggle riverMode, roadMode, walledMode;
         
         bool isDrag;
         HexDirection dragDirection;
@@ -120,6 +120,9 @@ namespace JS.HexMap
                 if (roadMode == OptionalToggle.No) {
                     cell.RemoveRoads();
                 }
+                if (walledMode != OptionalToggle.Ignore) {
+                    cell.Walled = walledMode == OptionalToggle.Yes;
+                }
                 if (isDrag) {
                     HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
                     if (otherCell) {
@@ -165,6 +168,10 @@ namespace JS.HexMap
         
         public void SetRoadMode (int mode) {
             roadMode = (OptionalToggle)mode;
+        }
+        
+        public void SetWalledMode (int mode) {
+            walledMode = (OptionalToggle)mode;
         }
         
         public void SetApplyWaterLevel (bool toggle) {

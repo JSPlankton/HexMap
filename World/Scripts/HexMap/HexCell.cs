@@ -118,6 +118,20 @@ namespace JS.HexMap
 	
         int waterLevel;
         
+        public bool Walled {
+            get {
+                return walled;
+            }
+            set {
+                if (walled != value) {
+                    walled = value;
+                    Refresh();
+                }
+            }
+        }
+	
+        bool walled;
+        
         public bool IsUnderwater {
             get {
                 return waterLevel > elevation;
