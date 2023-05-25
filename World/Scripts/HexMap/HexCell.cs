@@ -143,6 +143,27 @@ namespace JS.HexMap
                 return transform.localPosition;
             }
         }
+        
+        public int SpecialIndex {
+            get {
+                return specialIndex;
+            }
+            set {
+                if (specialIndex != value && !HasRiver) {
+                    specialIndex = value;
+                    RemoveRoads();
+                    RefreshSelfOnly();
+                }
+            }
+        }
+        
+        int specialIndex;
+        
+        public bool IsSpecial {
+            get {
+                return specialIndex > 0;
+            }
+        }
 
         #region 河流
         //河流 流入流出   
@@ -267,11 +288,13 @@ namespace JS.HexMap
             //设置流出方向河流
             hasOutgoingRiver = true;
             outgoingRiver = direction;
+            specialIndex = 0;
 
             //相邻单元格上已经有流入方向的河流时，移除它并设置新的流入河流
             neighbor.RemoveIncomingRiver();
             neighbor.hasIncomingRiver = true;
             neighbor.incomingRiver = direction.Opposite();
+            neighbor.specialIndex = 0;
             
             //河流可以冲散道路，Refresh在道路里做
             SetRoad((int)direction, false);
@@ -299,6 +322,7 @@ namespace JS.HexMap
         public void AddRoad (HexDirection direction) {
             if (
                 !roads[(int)direction] && !HasRiverThroughEdge(direction) &&
+                !IsSpecial && !GetNeighbor(direction).IsSpecial &&
                 GetElevationDifference(direction) <= 1
             ) {
                 SetRoad((int)direction, true);

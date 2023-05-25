@@ -937,6 +937,13 @@ MonoBehaviour:
     - {fileID: 4885633990673119486, guid: 5ed850aa799d5fe40919306bd82dfccd, type: 3}
     - {fileID: 4885633990673119486, guid: cb53b1b6a8272c4418a3996a80b3eeb2, type: 3}
   walls: {fileID: 187465829319461696}
+  wallTower: {fileID: 4885633990673119486, guid: 1b1cfb928ed155f4cb16c9dc795c9938,
+    type: 3}
+  bridge: {fileID: 4885633990673119486, guid: 30232a30872ea004d972afe7b5e1db82, type: 3}
+  special:
+  - {fileID: 4885633990673119486, guid: d4cccc0816a017447a179be531c7a20a, type: 3}
+  - {fileID: 4885633990673119486, guid: b336c53ae95992448a64372b6d55e788, type: 3}
+  - {fileID: 4885633990673119486, guid: e9466cf19047d05408bf8340a0fd5196, type: 3}
 --- !u!1001 &2177872153739772204
 PrefabInstance:
   m_ObjectHideFlags: 0

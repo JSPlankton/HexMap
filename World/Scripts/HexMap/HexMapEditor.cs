@@ -12,11 +12,11 @@ namespace JS.HexMap
         private Color activeColor;
         private int activeElevation;
         private int activeWaterLevel;
-        private int activeUrbanLevel, activeFarmLevel, activePlantLevel;
+        private int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
         private bool applyColor;
         private bool applyElevation;
         private bool applyWaterLevel;
-        private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel;
+        private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
         private int brushSize;
         
         //河流编辑模式
@@ -104,6 +104,9 @@ namespace JS.HexMap
                 }
                 if (applyWaterLevel) {
                     cell.WaterLevel = activeWaterLevel;
+                }
+                if (applySpecialIndex) {
+                    cell.SpecialIndex = activeSpecialIndex;
                 }
                 if (applyUrbanLevel) {
                     cell.UrbanLevel = activeUrbanLevel;
@@ -205,6 +208,12 @@ namespace JS.HexMap
             activePlantLevel = (int)level;
         }
 
-        
+        public void SetApplySpecialIndex (bool toggle) {
+            applySpecialIndex = toggle;
+        }
+
+        public void SetSpecialIndex (float index) {
+            activeSpecialIndex = (int)index;
+        }
     }
 }
