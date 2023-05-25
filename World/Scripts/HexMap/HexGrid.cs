@@ -1,3 +1,4 @@
+using System.IO;
 using TMPro;
 using UnityEngine;
 
@@ -8,8 +9,6 @@ namespace JS.HexMap
         int cellCountX, cellCountZ = 6;
         
         public int chunkCountX = 4, chunkCountZ = 3;
-        
-        public Color defaultColor = Color.white;
 
         public HexCell cellPrefab;
         public TextMeshProUGUI cellLabelPrefab;
@@ -22,10 +21,12 @@ namespace JS.HexMap
 
         public Texture2D noiseSource;
 
+        public Color[] colors;
 
         void Awake () {
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
+            HexMetrics.colors = colors;
 
             cellCountX = chunkCountX * HexMetrics.chunkSizeX;
             cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
@@ -59,6 +60,7 @@ namespace JS.HexMap
             if (!HexMetrics.noiseSource) {
                 HexMetrics.noiseSource = noiseSource;
                 HexMetrics.InitializeHashGrid(seed);
+                HexMetrics.colors = colors;
             }
         }
 
@@ -71,8 +73,7 @@ namespace JS.HexMap
             HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
             cell.transform.localPosition = position;
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-            cell.Color = defaultColor;
-            
+
             if (x > 0) {
                 cell.SetNeighbor(HexDirection.W, cells[i - 1]);
             }
@@ -134,6 +135,21 @@ namespace JS.HexMap
         public void ShowUI (bool visible) {
             for (int i = 0; i < chunks.Length; i++) {
                 chunks[i].ShowUI(visible);
+            }
+        }
+        
+        public void Save (BinaryWriter writer) {
+            for (int i = 0; i < cells.Length; i++) {
+                cells[i].Save(writer);
+            }
+        }
+
+        public void Load (BinaryReader reader) {
+            for (int i = 0; i < cells.Length; i++) {
+                cells[i].Load(reader);
+            }
+            for (int i = 0; i < chunks.Length; i++) {
+                chunks[i].Refresh();
             }
         }
         

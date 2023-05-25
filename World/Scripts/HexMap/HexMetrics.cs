@@ -64,6 +64,12 @@ namespace JS.HexMap
         
         public const float bridgeDesignLength = 7f;
 
+        #region 单元数据
+
+        public static Color[] colors;
+
+        #endregion
+
         #region 散列表
 
         public const int hashGridSize = 256;

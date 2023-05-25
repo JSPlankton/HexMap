@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -5,15 +6,13 @@ namespace JS.HexMap
 {
     public class HexMapEditor : MonoBehaviour
     {
-        public Color[] colors;
-
         public HexGrid hexGrid;
-
-        private Color activeColor;
+        
+        private int activeTerrainTypeIndex;
         private int activeElevation;
         private int activeWaterLevel;
         private int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
-        private bool applyColor;
+
         private bool applyElevation;
         private bool applyWaterLevel;
         private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
@@ -29,10 +28,6 @@ namespace JS.HexMap
         bool isDrag;
         HexDirection dragDirection;
         HexCell previousCell;
-        
-        void Awake () {
-            SelectColor(0);
-        }
 
         void Update () {
             if (
@@ -78,13 +73,6 @@ namespace JS.HexMap
             }
             isDrag = false;
         }
-
-        public void SelectColor (int index) {
-            applyColor = index >= 0;
-            if (applyColor) {
-                activeColor = colors[index];
-            }
-        }
         
         public void SetApplyElevation (bool toggle) {
             applyElevation = toggle;
@@ -96,8 +84,8 @@ namespace JS.HexMap
         
         void EditCell (HexCell cell) {
             if (cell) {
-                if (applyColor) {
-                    cell.Color = activeColor;
+                if (activeTerrainTypeIndex >= 0) {
+                    cell.TerrainTypeIndex = activeTerrainTypeIndex;
                 }
                 if (applyElevation) {
                     cell.Elevation = activeElevation;
@@ -215,5 +203,36 @@ namespace JS.HexMap
         public void SetSpecialIndex (float index) {
             activeSpecialIndex = (int)index;
         }
+        
+        public void SetTerrainTypeIndex (int index) {
+            activeTerrainTypeIndex = index;
+            
+        }
+
+        #region 存储与交互
+        
+        public void Save () 
+        {
+            string path = Path.Combine(Application.persistentDataPath, "test.map");
+            using (
+                BinaryWriter writer =
+                new BinaryWriter(File.Open(path, FileMode.Create))
+            ) {
+                writer.Write(0);
+                hexGrid.Save(writer);
+            }
+            Debug.Log("文件保存成功:" + Application.persistentDataPath + "/test.map");
+        }
+
+        public void Load () 
+        {
+            string path = Path.Combine(Application.persistentDataPath, "test.map");
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(path))) {
+                reader.ReadInt32();
+                hexGrid.Load(reader);
+            }
+        }
+
+        #endregion
     }
 }
