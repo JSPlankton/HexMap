@@ -41,7 +41,9 @@ Shader "JS/Env/Terrain"
 
             UNITY_DECLARE_TEX2DARRAY(_MainTex);
             float4 _MainTex_ST;
+            CBUFFER_START(UnityPerMaterial)
             float4 _Color;
+            CBUFFER_END
 
 	        float4 GetTerrainColor (v2f i, int index) {
 		        float3 uvw = float3(i.posWS.xz * 0.02, i.terrain[index]);
