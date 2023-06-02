@@ -1,8 +1,9 @@
-Shader "JS/Unlit/Color"
+Shader "JS/Env/Terrain"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _Color ("Color", Color) = (1,1,1,1)
+        _MainTex ("Terrain Texture Array", 2DArray) = "white" {}
     }
     SubShader
     {
@@ -15,6 +16,7 @@ Shader "JS/Unlit/Color"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fwdbase
+            #pragma target 3.5
 
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
@@ -23,30 +25,37 @@ Shader "JS/Unlit/Color"
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
                 float4 color : COLOR;
+                float3 terrain : TEXCOORD2;
             };
 
             struct v2f
             {
-                float4 pos : SV_POSITION;
+                float4 posCS : SV_POSITION;
+                float3 posWS : TEXCOORD0;
+                float3 terrain : TEXCOORD1;
                 float4 color : Color;
-                float2 uv : TEXCOORD0;
-                float3 posWS : TEXCOORD1;
 
                 SHADOW_COORDS(2)//仅仅是阴影
             };
 
-            sampler2D _MainTex;
+            UNITY_DECLARE_TEX2DARRAY(_MainTex);
             float4 _MainTex_ST;
+            float4 _Color;
+
+	        float4 GetTerrainColor (v2f i, int index) {
+		        float3 uvw = float3(i.posWS.xz * 0.02, i.terrain[index]);
+		        float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, uvw);
+		        return c * i.color[index];
+	        }
 
             v2f vert (appdata v)
             {
                 v2f o;
-                o.pos = UnityObjectToClipPos(v.vertex);
+                o.posCS = UnityObjectToClipPos(v.vertex);
                 o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.color = v.color;
+	            o.terrain = v.terrain;
                 TRANSFER_SHADOW(o);
 
                 return o;
@@ -54,14 +63,17 @@ Shader "JS/Unlit/Color"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+			    half4 col =
+				    GetTerrainColor(i, 0) +
+				    GetTerrainColor(i, 1) +
+				    GetTerrainColor(i, 2);
                 // UNITY_LIGHT_ATTENUATION(atten, i, i.posWS);
-                fixed shadow = SHADOW_ATTENUATION(i);
-                col.rgb *= i.color;
-                col *= shadow;
+                // fixed shadow = SHADOW_ATTENUATION(i);
+                // col.rgb *= i.color;
+                // col *= shadow;
                 
-                return col;
+                return col * _Color;
+                // return half4(i.terrain.xyz, 1);
             }
             ENDCG
         }

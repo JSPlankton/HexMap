@@ -20,12 +20,9 @@ namespace JS.HexMap
 
         public Texture2D noiseSource;
 
-        public Color[] colors;
-
         void Awake () {
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
-            HexMetrics.colors = colors;
             CreateMap(cellCountX, cellCountZ);
         }
         
@@ -79,7 +76,6 @@ namespace JS.HexMap
             if (!HexMetrics.noiseSource) {
                 HexMetrics.noiseSource = noiseSource;
                 HexMetrics.InitializeHashGrid(seed);
-                HexMetrics.colors = colors;
             }
         }
 

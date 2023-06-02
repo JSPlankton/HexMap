@@ -206,7 +206,6 @@ namespace JS.HexMap
         
         public void SetTerrainTypeIndex (int index) {
             activeTerrainTypeIndex = index;
-            
         }
 
     }

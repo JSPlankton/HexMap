@@ -9,8 +9,9 @@ namespace JS.HexMap
 	{
 
 		public bool useCollider, useColors, useUVCoordinates, useUVCoordinates2;
+		public bool useTerrainTypes;
 
-		[NonSerialized] List<Vector3> vertices;
+		[NonSerialized] List<Vector3> vertices, terrainTypes;
 		[NonSerialized] List<Color> colors;
 		[NonSerialized] List<Vector2> uvs, uv2s;
 		[NonSerialized] List<int> triangles;
@@ -37,16 +38,20 @@ namespace JS.HexMap
 			{
 				colors = ListPool<Color>.Get();
 			}
-
+			
 			if (useUVCoordinates)
 			{
 				uvs = ListPool<Vector2>.Get();
 			}
+			
 			if (useUVCoordinates2)
 			{
 				uv2s = ListPool<Vector2>.Get();
 			}
-
+			
+			if (useTerrainTypes) {
+				terrainTypes = ListPool<Vector3>.Get();
+			}
 			triangles = ListPool<int>.Get();
 		}
 
@@ -71,7 +76,11 @@ namespace JS.HexMap
 				hexMesh.SetUVs(1, uv2s);
 				ListPool<Vector2>.Add(uv2s);
 			}
-
+			
+			if (useTerrainTypes) {
+				hexMesh.SetUVs(2, terrainTypes);
+				ListPool<Vector3>.Add(terrainTypes);
+			}
 			hexMesh.SetTriangles(triangles, 0);
 			ListPool<int>.Add(triangles);
 			hexMesh.RecalculateNormals();
@@ -214,6 +223,19 @@ namespace JS.HexMap
 			triangles.Add(vertexIndex + 1);
 			triangles.Add(vertexIndex + 2);
 			triangles.Add(vertexIndex + 3);
+		}
+		
+		public void AddTriangleTerrainTypes (Vector3 types) {
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+		}
+		
+		public void AddQuadTerrainTypes (Vector3 types) {
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
 		}
 	}
 

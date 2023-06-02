@@ -9,14 +9,7 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
-        
-        //单元格颜色
-        public Color Color {
-            get {
-                return HexMetrics.colors[terrainTypeIndex];
-            }
-        }
-        
+
         public int TerrainTypeIndex {
             get {
                 return terrainTypeIndex;
