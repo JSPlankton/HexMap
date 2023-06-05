@@ -2,9 +2,10 @@ Shader "JS/Env/TerrainLit"
 {
     Properties
     {
-        
         _BaseMaps("Terrain Texture Array", 2DArray) = "white" {}
         [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
+        
+        [Normal]_BumpMaps("Terrain Bump Texture Array", 2DArray) = "white" {}
     }
 
     SubShader
@@ -39,34 +40,17 @@ Shader "JS/Env/TerrainLit"
             // -------------------------------------
             // Material Keywords
             #pragma shader_feature_local _NORMALMAP
-            #pragma shader_feature_local _PARALLAXMAP
             #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
-            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
-            #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _ALPHAPREMULTIPLY_ON _ALPHAMODULATE_ON
             #pragma shader_feature_local_fragment _EMISSION
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma shader_feature_local_fragment _OCCLUSIONMAP
-            #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
-            #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
-            #pragma shader_feature_local_fragment _SPECULAR_SETUP
 
             // -------------------------------------
             // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
-            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
-            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
-            #pragma multi_compile_fragment _ _LIGHT_LAYERS
-            #pragma multi_compile_fragment _ _LIGHT_COOKIES
-            #pragma multi_compile _ _FORWARD_PLUS
-            #pragma multi_compile_fragment _ _WRITE_RENDERING_LAYERS
             
             //--------------------------------------
             // GPU Instancing
@@ -103,12 +87,22 @@ Shader "JS/Env/TerrainLit"
 
             TEXTURE2D_ARRAY(_BaseMaps);
             SAMPLER(sampler_BaseMaps);
+
+            TEXTURE2D_ARRAY(_BumpMaps);
+            SAMPLER(sampler_BumpMaps);
+            
             float4 _BaseMaps_ST;
 
             float4 GetTerrainColor (Varyings input, int index) {
 		        float3 uvw = float3(input.positionWS.xz * 0.02, input.terrain[index]);
 		        float4 c = _BaseMaps.Sample(sampler_BaseMaps, uvw);
 		        return c * input.color[index];
+	        }
+
+            float3 GetTerrainNormal (Varyings input, int index) {
+                float3 uvw = float3(input.positionWS.xz * 0.02, input.terrain[index]);
+                half3 NormalTS = UnpackNormalScale(_BumpMaps.Sample(sampler_BumpMaps, uvw), 1.0);
+		        return NormalTS;
 	        }
 
             // Used in Standard (Physically Based) shader
@@ -154,11 +148,13 @@ Shader "JS/Env/TerrainLit"
                 half3 worldTangent = normalize(input.tangentWS.xyz);
                 half3 worldBinnormal = normalize(cross(worldNormal, worldTangent) * input.tangentWS.w);
                 half3x3 TBN = half3x3(worldTangent, worldBinnormal, worldNormal);
-                
-                float4 shadowCoord = input.shadowCoord;
-                float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
-                half4 shadowMask = half4(1.0, 1.0, 1.0, 1.0);
 
+                half3 NormalTS = GetTerrainNormal(input, 0) +
+				    GetTerrainNormal(input, 1) +
+				    GetTerrainNormal(input, 2);
+
+                worldNormal = normalize(mul(NormalTS,TBN));
+                
                 //材质参数
 			    half3 baseColor =
 				    GetTerrainColor(input, 0) +
