@@ -92,15 +92,16 @@ Shader "JS/Env/TerrainLit"
             SAMPLER(sampler_BumpMaps);
             
             float4 _BaseMaps_ST;
+            float4 _BumpMaps_ST;
 
             float4 GetTerrainColor (Varyings input, int index) {
-		        float3 uvw = float3(input.positionWS.xz * 0.02, input.terrain[index]);
+		        float3 uvw = float3(input.positionWS.xz * 0.02 * _BaseMaps_ST.xy, input.terrain[index]);
 		        float4 c = _BaseMaps.Sample(sampler_BaseMaps, uvw);
 		        return c * input.color[index];
 	        }
 
             float3 GetTerrainNormal (Varyings input, int index) {
-                float3 uvw = float3(input.positionWS.xz * 0.02, input.terrain[index]);
+                float3 uvw = float3(input.positionWS.xz * 0.02 * _BumpMaps_ST.xy, input.terrain[index]);
                 half3 NormalTS = UnpackNormalScale(_BumpMaps.Sample(sampler_BumpMaps, uvw), 1.0);
 		        return NormalTS;
 	        }
