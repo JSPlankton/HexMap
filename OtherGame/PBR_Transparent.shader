@@ -1,4 +1,4 @@
-Shader "JS/Env/PBR_MR"
+Shader "JS/Env/PBR_Transparent"
 {
     Properties
     {
@@ -16,7 +16,7 @@ Shader "JS/Env/PBR_MR"
         // Universal Pipeline tag is required. If Universal render pipeline is not set in the graphics settings
         // this Subshader will fail. One can add a subshader below or fallback to Standard built-in to make this
         // material work with both Universal Render Pipeline and Builtin Unity Pipeline
-        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "UniversalMaterialType" = "Lit" "IgnoreProjector" = "True" "ShaderModel"="4.5"}
+        Tags{"RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" "UniversalMaterialType" = "Lit" "IgnoreProjector" = "True" "ShaderModel"="4.5"}
         LOD 300
 
         // ------------------------------------------------------------------
@@ -26,7 +26,8 @@ Shader "JS/Env/PBR_MR"
             Name "ForwardLit"
             Tags{"LightMode" = "UniversalForward"}
 
-//            ZWrite[_ZWrite]
+	        ZWrite Off
+	        Blend SrcAlpha OneMinusSrcAlpha 
             Cull[_Cull]
 
             HLSLPROGRAM
@@ -81,7 +82,13 @@ Shader "JS/Env/PBR_MR"
                 float4 color                    : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
-   
+
+
+            float _RigOffset;
+            float _RippleFreq;
+            float _Strength;
+            float _OffsetRadio;
+            float4 _Dirction;
 
             // Used in Standard (Physically Based) shader
             Varyings LitPassVertex(Attributes input)
@@ -105,7 +112,6 @@ Shader "JS/Env/PBR_MR"
                 output.positionCS = vertexInput.positionCS;
                 
                 output.color = input.color;
-
                 return output;
             }
 
@@ -150,8 +156,7 @@ Shader "JS/Env/PBR_MR"
                 half3 indirectLighting = half3(0,0,0);
                 IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,ao,0,indirectLighting);
 
-                // outColor = half4(directLighting + indirectLighting, 1.0f);
-                outColor = half4(directLighting + indirectLighting, 1.0f);
+                outColor = half4(directLighting + indirectLighting, baseColor.a);
             }
             
 
