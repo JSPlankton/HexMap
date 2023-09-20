@@ -2,6 +2,10 @@
 #define STANDARD_LIGHTING_INCLUDE
 #include "LightingCommon.hlsl"
 
+#ifndef UNITY_PI
+#define UNITY_PI 3.14159265358979323846
+#endif
+
 float3 StandardBRDF( float3 DiffuseColor, float3 SpecularColor, float Roughness, float3 N, float3 V, float3 L,float3 LightColor,float Shadow)
 {
 	float a2 = Pow4( Roughness );

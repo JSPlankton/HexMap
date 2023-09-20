@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.IO;
+using TMPro;
 using UnityEngine.Rendering.Universal;
 
 namespace JS.HexMap
@@ -21,7 +22,19 @@ namespace JS.HexMap
                 }
             }
         }
-        int terrainTypeIndex;
+        private int terrainTypeIndex;
+        private int distance;
+
+        public int Distance {
+            get {
+                return distance;
+            }
+            set
+            {
+                distance = value;
+                UpdateDistanceLabel();
+            }
+        }
         
         //生成地形特征物等级
         public int UrbanLevel {
@@ -482,6 +495,14 @@ namespace JS.HexMap
             int roadFlags = reader.ReadByte();
             for (int i = 0; i < roads.Length; i++) {
                 roads[i] = (roadFlags & (1 << i)) != 0;
+            }
+        }
+
+        private void UpdateDistanceLabel()
+        {
+            if (uiRect.TryGetComponent(out TextMeshProUGUI label))
+            {
+                label.text = distance == int.MaxValue ? "" : distance.ToString();
             }
         }
     }

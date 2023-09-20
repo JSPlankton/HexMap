@@ -4,8 +4,12 @@ Shader "JS/Env/TerrainLit"
     {
         _BaseMaps("Terrain Texture Array", 2DArray) = "white" {}
         [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
-        
         [Normal]_BumpMaps("Terrain Bump Texture Array", 2DArray) = "white" {}
+        
+        _GridTex("Grid Texture", 2D) = "white" {}
+        
+        _Metallic("Metallic",Range(0.0,1.0)) = 1.0
+        _Smoothness("_Smoothness",Range(0.0,1.0)) = 1.0
     }
 
     SubShader
@@ -58,6 +62,9 @@ Shader "JS/Env/TerrainLit"
             #pragma instancing_options renderinglayer
             #pragma multi_compile _ DOTS_INSTANCING_ON
 
+            // func switch
+            #pragma multi_compile _ GRID_ON
+
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
 
@@ -90,6 +97,9 @@ Shader "JS/Env/TerrainLit"
 
             TEXTURE2D_ARRAY(_BumpMaps);
             SAMPLER(sampler_BumpMaps);
+
+            TEXTURE2D(_GridTex);
+            SAMPLER(sampler_GridTex);
             
             float4 _BaseMaps_ST;
             float4 _BumpMaps_ST;
@@ -104,6 +114,11 @@ Shader "JS/Env/TerrainLit"
                 float3 uvw = float3(input.positionWS.xz * 0.02 * _BumpMaps_ST.xy, input.terrain[index]);
                 half3 NormalTS = UnpackNormalScale(_BumpMaps.Sample(sampler_BumpMaps, uvw), 1.0);
 		        return NormalTS;
+	        }
+
+            float4 GetTerrainNormalRGB (Varyings input, int index) {
+                float3 uvw = float3(input.positionWS.xz * 0.02 * _BumpMaps_ST.xy, input.terrain[index]);
+                return _BumpMaps.Sample(sampler_BumpMaps, uvw);
 	        }
 
             // Used in Standard (Physically Based) shader
@@ -154,6 +169,10 @@ Shader "JS/Env/TerrainLit"
 				    GetTerrainNormal(input, 1) +
 				    GetTerrainNormal(input, 2);
 
+                half4 NormalRGB = GetTerrainNormalRGB(input, 0) +
+				GetTerrainNormalRGB(input, 1) +
+				GetTerrainNormalRGB(input, 2);
+
                 worldNormal = normalize(mul(NormalTS,TBN));
                 
                 //材质参数
@@ -162,16 +181,29 @@ Shader "JS/Env/TerrainLit"
 				    GetTerrainColor(input, 1) +
 				    GetTerrainColor(input, 2);
 
+                half roughness = (1 - NormalRGB.b) * _Smoothness;
+                roughness = max(roughness,0.001f);
+                half metallic = NormalRGB.a * _Metallic;
                 //BRDF
-                half3 diffuseColor = baseColor  * _BaseColor;
-                half3 specularColor = half3(0.04, 0.04, 0.04);
+                half3 diffuseColor = lerp(baseColor * _BaseColor, float3(0.0,0.0,0.0), metallic);
+                half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
+
+                //格子绘制
+                #if defined(GRID_ON)
+                    float2 gridUV = worldPos.xz;
+                    gridUV.x *= 1 / (4 * 8.66025404);
+                    gridUV.y *= 1 / (2 * 15.0);
+                    float4 gridColor = _GridTex.Sample(sampler_GridTex, gridUV);
+                    diffuseColor *= gridColor;
+                #endif
+     
 
                 //主光源
                 half3 directLighting = half3(0, 0, 0);
-                DirectLighting_float(diffuseColor, specularColor, 0, worldPos, worldNormal, viewDir, directLighting);
+                DirectLighting_float(diffuseColor, specularColor, roughness, worldPos, worldNormal, viewDir, directLighting);
 
                 half3 indirectLighting = half3(0,0,0);
-                IndirectLighting_float(diffuseColor,specularColor,0,worldPos,worldNormal,viewDir,0,0,indirectLighting);
+                IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,1,0,indirectLighting);
 
                 outColor = half4(directLighting + indirectLighting, 1.0f);
             }

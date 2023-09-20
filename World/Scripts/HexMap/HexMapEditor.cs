@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,6 +9,8 @@ namespace JS.HexMap
     {
         public HexGrid hexGrid;
         
+        public Material terrainMaterial;
+        
         private int activeTerrainTypeIndex;
         private int activeElevation;
         private int activeWaterLevel;
@@ -17,6 +20,12 @@ namespace JS.HexMap
         private bool applyWaterLevel;
         private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
         private int brushSize;
+
+        private bool editMode;
+
+        public GameObject[] EditComp;
+        public RectTransform Panel;
+        
         
         //河流编辑模式
         enum OptionalToggle {
@@ -28,6 +37,12 @@ namespace JS.HexMap
         bool isDrag;
         HexDirection dragDirection;
         HexCell previousCell;
+
+        private void Awake()
+        {
+            ShowGrid(false);
+            SetEditCompState(false);
+        }
 
         void Update () {
             if (
@@ -52,7 +67,16 @@ namespace JS.HexMap
                 else {
                     isDrag = false;
                 }
-                EditCells(currentCell);
+
+                if (editMode)
+                {
+                    EditCells(currentCell);
+                }
+                else
+                {
+                    hexGrid.FindDistanceTo(currentCell);
+                }
+                
                 previousCell = currentCell;
             }
             else {
@@ -148,11 +172,7 @@ namespace JS.HexMap
         public void SetElevation (float elevation) {
             activeElevation = (int)elevation;
         }
-        
-        public void ShowUI (bool visible) {
-            hexGrid.ShowUI(visible);
-        }
-        
+
         public void SetRiverMode (int mode) {
             riverMode = (OptionalToggle)mode;
         }
@@ -206,6 +226,50 @@ namespace JS.HexMap
         
         public void SetTerrainTypeIndex (int index) {
             activeTerrainTypeIndex = index;
+        }
+
+        public void ShowGrid(bool visible)
+        {
+            if (visible)
+            {
+                terrainMaterial.EnableKeyword("GRID_ON");
+            }
+            else
+            {
+                terrainMaterial.DisableKeyword("GRID_ON");
+            }
+        }
+        
+        public void SetEditMode (bool toggle)
+        {
+            editMode = toggle;
+            hexGrid.ShowUI(!toggle);
+            SetEditCompState(editMode);
+        }
+
+        private void SetEditCompState(bool state)
+        {
+            foreach (var editComp in EditComp)
+            {
+                editComp.SetActive(state);
+            }
+
+            float sizeY = 0f;
+            for (int i = 0; i < Panel.childCount; i++)
+            {
+                var child = Panel.GetChild(i);
+                if (!child.gameObject.activeSelf)
+                {
+                    continue;
+                }
+                if (child.gameObject.TryGetComponent(out RectTransform rectTransform))
+                {
+                    sizeY += rectTransform.sizeDelta.y;
+                }
+            }
+
+            Vector2 defaultSize = Panel.sizeDelta;
+            Panel.sizeDelta = new Vector2(defaultSize.x, sizeY);
         }
 
     }
