@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 using TMPro;
 using UnityEngine.Rendering.Universal;
@@ -10,6 +11,15 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
+        public HexCell PathFrom { get; set; }
+        public int SearchHeuristic { get; set; }
+        public int SearchPriority {
+            get {
+                return distance + SearchHeuristic;
+            }
+        }
+        
+        public HexCell NextWithSamePriority { get; set; }
 
         public int TerrainTypeIndex {
             get {
@@ -504,6 +514,17 @@ namespace JS.HexMap
             {
                 label.text = distance == int.MaxValue ? "" : distance.ToString();
             }
+        }
+        
+        public void DisableHighlight () {
+            Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+            highlight.enabled = false;
+        }
+	
+        public void EnableHighlight (Color color) {
+            Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+            highlight.color = color;
+            highlight.enabled = true;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace JS.HexMap
         
         bool isDrag;
         HexDirection dragDirection;
-        HexCell previousCell;
+        HexCell previousCell, searchFromCell, searchToCell;
 
         private void Awake()
         {
@@ -72,9 +72,19 @@ namespace JS.HexMap
                 {
                     EditCells(currentCell);
                 }
-                else
-                {
-                    hexGrid.FindDistanceTo(currentCell);
+                else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
+                    if (searchFromCell) {
+                        searchFromCell.DisableHighlight();
+                    }
+                    searchFromCell = currentCell;
+                    searchFromCell.EnableHighlight(Color.blue);
+                    if (searchToCell) {
+                        hexGrid.FindPath(searchFromCell, searchToCell);
+                    }
+                }
+                else if (searchFromCell && searchFromCell != currentCell) {
+                    searchToCell = currentCell;
+                    hexGrid.FindPath(searchFromCell, searchToCell);
                 }
                 
                 previousCell = currentCell;
