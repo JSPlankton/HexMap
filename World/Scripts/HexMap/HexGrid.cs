@@ -20,10 +20,14 @@ namespace JS.HexMap
         
         HexCell[] cells;
         HexGridChunk[] chunks;
+        int searchFrontierPhase;
 
         public Texture2D noiseSource;
         
         HexCellPriorityQueue searchFrontier;
+        
+        HexCell currentPathFrom, currentPathTo;
+        bool currentPathExists;
 
         void Awake () {
             HexMetrics.noiseSource = noiseSource;
@@ -39,7 +43,7 @@ namespace JS.HexMap
                 Debug.LogError("Unsupported map size.");
                 return false;
             }
-
+            ClearPath();
             if (chunks != null) {
                 for (int i = 0; i < chunks.Length; i++) {
                     Destroy(chunks[i].gameObject);
@@ -167,7 +171,7 @@ namespace JS.HexMap
         }
 
         public void Load (BinaryReader reader, int header) {
-            StopAllCoroutines();
+            ClearPath();
             int x = 20, z = 15;
             if (header >= 1) {
                 x = reader.ReadInt32();
@@ -186,48 +190,81 @@ namespace JS.HexMap
             }
         }
 
-        public void FindPath (HexCell fromCell, HexCell toCell) {
-            StopAllCoroutines();
-            StartCoroutine(Search(fromCell, toCell));
+        public void FindPath (HexCell fromCell, HexCell toCell, int speed) {
+            ClearPath();
+            
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            currentPathFrom = fromCell;
+            currentPathTo = toCell;
+            currentPathExists = Search(fromCell, toCell, speed);
+            sw.Stop();
+            Debug.Log($"寻路耗时{sw.ElapsedMilliseconds}ms");
+            
+            ShowPath(speed);
+        }
+        
+        private void ShowPath (int speed) {
+            if (currentPathExists) {
+                HexCell current = currentPathTo;
+                while (current != currentPathFrom) {
+                    int turn = current.Distance / speed;
+                    current.SetLabel(turn.ToString());
+                    current.EnableHighlight(Color.white);
+                    current = current.PathFrom;
+                }
+            }
+            currentPathFrom.EnableHighlight(Color.blue);
+            currentPathTo.EnableHighlight(Color.red);
+        }
+        
+        private void ClearPath () {
+            if (currentPathExists) {
+                HexCell current = currentPathTo;
+                while (current != currentPathFrom) {
+                    current.SetLabel(null);
+                    current.DisableHighlight();
+                    current = current.PathFrom;
+                }
+                current.DisableHighlight();
+                currentPathExists = false;
+            }
+            else if (currentPathFrom) {
+                currentPathFrom.DisableHighlight();
+                currentPathTo.DisableHighlight();
+            }
+            
+            currentPathFrom = currentPathTo = null;
         }
 
-        IEnumerator Search(HexCell fromCell, HexCell toCell)
+        private bool Search(HexCell fromCell, HexCell toCell, int speed)
         {
+            searchFrontierPhase += 2;
             if (searchFrontier == null) {
                 searchFrontier = new HexCellPriorityQueue();
             }
             else {
                 searchFrontier.Clear();
             }
-            for (int i = 0; i < cells.Length; i++)
-            {
-                cells[i].Distance = int.MaxValue;
-                cells[i].DisableHighlight();
-            }
-            fromCell.EnableHighlight(Color.blue);
-            toCell.EnableHighlight(Color.red);
-            
-            WaitForSeconds delay = new WaitForSeconds(1 / 60f);
 
+            fromCell.SearchPhase = searchFrontierPhase;
             fromCell.Distance = 0;
+            
             searchFrontier.Enqueue(fromCell);
+            
             while (searchFrontier.Count > 0)
             {
-                yield return delay;
                 HexCell current = searchFrontier.Dequeue();
-
+                current.SearchPhase += 1;
                 if (current == toCell) {
-                    current = current.PathFrom;
-                    while (current != fromCell) {
-                        current.EnableHighlight(Color.white);
-                        current = current.PathFrom;
-                    }
-                    break;
+                    return true;
                 }
+                
+                int currentTurn = current.Distance / speed;
                 
                 for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
                     HexCell neighbor = current.GetNeighbor(d);
-                    if (neighbor == null) {
+                    if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
                         continue;
                     }
                     if (neighbor.IsUnderwater)
@@ -238,19 +275,26 @@ namespace JS.HexMap
                     if (edgeType == HexEdgeType.Cliff) {
                         continue;
                     }
-                    int distance = current.Distance;
+                    int moveCost;
                     if (current.HasRoadThroughEdge(d)) {
-                        distance += 1;
+                        moveCost = 1;
                     }
                     else if (current.Walled != neighbor.Walled) {
                         continue;
                     }
                     else {
-                        distance += edgeType == HexEdgeType.Flat ? 5 : 10;
-                        distance += neighbor.UrbanLevel + neighbor.FarmLevel +
+                        moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
+                        moveCost += neighbor.UrbanLevel + neighbor.FarmLevel +
                                     neighbor.PlantLevel;
                     }
-                    if (neighbor.Distance == int.MaxValue) {
+                    
+                    int distance = current.Distance + moveCost;
+                    int turn = distance / speed;
+                    if (turn > currentTurn) {
+                        distance = turn * speed + moveCost;
+                    }
+                    if (neighbor.SearchPhase < searchFrontierPhase) {
+                        neighbor.SearchPhase = searchFrontierPhase;
                         neighbor.Distance = distance;
                         neighbor.PathFrom = current;
                         neighbor.SearchHeuristic =
@@ -265,6 +309,8 @@ namespace JS.HexMap
                     }
                 }
             }
+            
+            return false;
         }
         
     }

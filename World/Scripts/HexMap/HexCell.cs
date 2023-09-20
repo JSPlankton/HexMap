@@ -20,6 +20,8 @@ namespace JS.HexMap
         }
         
         public HexCell NextWithSamePriority { get; set; }
+        
+        public int SearchPhase { get; set; }
 
         public int TerrainTypeIndex {
             get {
@@ -42,7 +44,6 @@ namespace JS.HexMap
             set
             {
                 distance = value;
-                UpdateDistanceLabel();
             }
         }
         
@@ -507,15 +508,14 @@ namespace JS.HexMap
                 roads[i] = (roadFlags & (1 << i)) != 0;
             }
         }
-
-        private void UpdateDistanceLabel()
-        {
-            if (uiRect.TryGetComponent(out TextMeshProUGUI label))
+        
+        public void SetLabel (string text) {
+            if (uiRect.TryGetComponent(out TextMeshProUGUI textMeshProUGUI))
             {
-                label.text = distance == int.MaxValue ? "" : distance.ToString();
+                textMeshProUGUI.text = text;
             }
         }
-        
+
         public void DisableHighlight () {
             Image highlight = uiRect.GetChild(0).GetComponent<Image>();
             highlight.enabled = false;
