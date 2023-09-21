@@ -21,12 +21,10 @@ namespace JS.HexMap
         private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
         private int brushSize;
 
-        private bool editMode;
-
         public GameObject[] EditComp;
         public RectTransform Panel;
-        
-        
+
+
         //河流编辑模式
         enum OptionalToggle {
             Ignore, Yes, No
@@ -36,7 +34,7 @@ namespace JS.HexMap
         
         bool isDrag;
         HexDirection dragDirection;
-        HexCell previousCell, searchFromCell, searchToCell;
+        private HexCell previousCell;
 
         private void Awake()
         {
@@ -45,55 +43,38 @@ namespace JS.HexMap
         }
 
         void Update () {
-            if (
-                Input.GetMouseButton(0) &&
-                !EventSystem.current.IsPointerOverGameObject()
-            ) {
-                HandleInput();
+            if (!EventSystem.current.IsPointerOverGameObject()) {
+                if (Input.GetMouseButton(0)) {
+                    HandleInput();
+                    return;
+                }
+                if (Input.GetKeyDown(KeyCode.U)) {
+                    if (Input.GetKey(KeyCode.LeftShift)) {
+                        DestroyUnit();
+                    }
+                    else {
+                        CreateUnit();
+                    }
+                    return;
+                }
             }
-            else {
-                previousCell = null;
-            }
+            previousCell = null;
         }
 
         void HandleInput () {
-            Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(inputRay, out hit)) {
-                HexCell currentCell = hexGrid.GetCell(hit.point);
+            HexCell currentCell = GetCellUnderCursor();
+            if (currentCell) {
+                
                 if (previousCell && previousCell != currentCell) {
                     ValidateDrag(currentCell);
                 }
                 else {
                     isDrag = false;
                 }
-
-                if (editMode)
-                {
-                    EditCells(currentCell);
-                }
-                else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
-                    if (searchFromCell != currentCell)
-                    {
-                        if (searchFromCell) {
-                            searchFromCell.DisableHighlight();
-                        }
-                        searchFromCell = currentCell;
-                        searchFromCell.EnableHighlight(Color.blue);
-                        if (searchToCell) {
-                            hexGrid.FindPath(searchFromCell, searchToCell, 24);
-                        }
-                    }
-                }
-                else if (searchFromCell && searchFromCell != currentCell) {
-                    if (searchToCell != currentCell)
-                    {
-                        searchToCell = currentCell;
-                        hexGrid.FindPath(searchFromCell, searchToCell, 24);
-                    }
-                }
                 
+                EditCells(currentCell);
                 previousCell = currentCell;
+                
             }
             else {
                 previousCell = null;
@@ -258,9 +239,8 @@ namespace JS.HexMap
         
         public void SetEditMode (bool toggle)
         {
-            editMode = toggle;
-            hexGrid.ShowUI(!toggle);
-            SetEditCompState(editMode);
+            // enabled = toggle;
+            SetEditCompState(toggle);
         }
 
         private void SetEditCompState(bool state)
@@ -286,6 +266,28 @@ namespace JS.HexMap
 
             Vector2 defaultSize = Panel.sizeDelta;
             Panel.sizeDelta = new Vector2(defaultSize.x, sizeY);
+        }
+        
+        private HexCell GetCellUnderCursor () {
+            return
+                hexGrid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition));
+        }
+        
+        private void CreateUnit () {
+            HexCell cell = GetCellUnderCursor();
+            if (cell && !cell.Unit) 
+            {
+                hexGrid.AddUnit(
+                    Instantiate(HexUnit.unitPrefab), cell, UnityEngine.Random.Range(0f, 360f)
+                );
+            }
+        }
+        
+        private void DestroyUnit () {
+            HexCell cell = GetCellUnderCursor();
+            if (cell && cell.Unit) {
+                hexGrid.RemoveUnit(cell.Unit);
+            }
         }
 
     }

@@ -6061,6 +6061,8 @@ MonoBehaviour:
   - {fileID: 787129510332759895}
   - {fileID: 4624320122326505935}
   Panel: {fileID: 2696425691767384191}
+  unitPrefab: {fileID: 2590242761581195065, guid: 6e88854799548fe40a74cf07d3d87b0b,
+    type: 3}
 --- !u!222 &948422698922121720
 CanvasRenderer:
   m_ObjectHideFlags: 0

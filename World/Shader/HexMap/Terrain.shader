@@ -86,7 +86,6 @@ Shader "JS/Env/TerrainLit"
                 float3 normalWS                 : TEXCOORD2;
                 half4 tangentWS                 : TEXCOORD3;
                 float3 terrain                  : TEXCOORD4;
-                float4 shadowCoord              : TEXCOORD5;
                 float4 positionCS               : SV_POSITION;
                 float4 color                    : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -139,7 +138,6 @@ Shader "JS/Env/TerrainLit"
                 output.tangentWS = tangentWS;
                 
                 output.positionWS = vertexInput.positionWS;
-                output.shadowCoord = GetShadowCoord(vertexInput);
                 output.positionCS = vertexInput.positionCS;
 
                 output.terrain = input.terrain;

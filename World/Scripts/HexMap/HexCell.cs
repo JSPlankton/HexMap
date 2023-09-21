@@ -11,6 +11,7 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
+        public HexUnit Unit { get; set; }
         public HexCell PathFrom { get; set; }
         public int SearchHeuristic { get; set; }
         public int SearchPriority {
@@ -413,11 +414,17 @@ namespace JS.HexMap
                         neighbor.chunk.Refresh();
                     }
                 }
+                if (Unit) {
+                    Unit.ValidateLocation();
+                }
             }
         }
         
         void RefreshSelfOnly () {
             chunk.Refresh();
+            if (Unit) {
+                Unit.ValidateLocation();
+            }
         }
         
         void ValidateRivers () {

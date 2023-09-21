@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb46249f23b71b040a6a3b65f278d7c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cellCountX: 20
+  cellCountZ: 15
   chunkCountX: 4
   chunkCountZ: 3
   cellPrefab: {fileID: 7571643457318711765, guid: ff891085819eb0b48807b69383a6e331,
@@ -54,9 +56,5 @@ MonoBehaviour:
     type: 3}
   seed: 1234
   noiseSource: {fileID: 2800000, guid: 6fb939df51fbf7d46b1fed785da7140a, type: 3}
-  colors:
-  - {r: 0.745283, g: 0.6931096, b: 0.3058473, a: 0}
-  - {r: 0.16420436, g: 0.7735849, b: 0.35351735, a: 0}
-  - {r: 0.22801706, g: 0.5053112, b: 0.7924528, a: 0}
-  - {r: 1, g: 1, b: 1, a: 0}
-  - {r: 0.9339623, g: 0.37672374, b: 0.09251513, a: 0}
+  unitPrefab: {fileID: 2590242761581195065, guid: 6e88854799548fe40a74cf07d3d87b0b,
+    type: 3}
