@@ -1,15 +1,15 @@
-Shader "JS/Env/TerrainLit"
+Shader "JS/Env/Feature"
 {
     Properties
     {
-        _BaseMaps("Terrain Texture Array", 2DArray) = "white" {}
+        _BaseMap("Main Texture", 2D) = "white" {}
         [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
-        [Normal]_BumpMaps("Terrain Bump Texture Array", 2DArray) = "white" {}
-        
-        _GridTex("Grid Texture", 2D) = "white" {}
+        [Normal]_BumpMap("Normal Map", 2D) = "bump" {}
         
         _Metallic("Metallic",Range(0.0,1.0)) = 1.0
         _Smoothness("_Smoothness",Range(0.0,1.0)) = 1.0
+        
+        [NoScaleOffset] _GridCoordinates ("Grid Coordinates", 2D) = "white" {}
     }
 
     SubShader
@@ -27,7 +27,6 @@ Shader "JS/Env/TerrainLit"
             Name "ForwardLit"
             Tags{"LightMode" = "UniversalForward"}
 
-//            ZWrite[_ZWrite]
             Cull[_Cull]
 
             HLSLPROGRAM
@@ -63,9 +62,6 @@ Shader "JS/Env/TerrainLit"
             #pragma instancing_options renderinglayer
             #pragma multi_compile _ DOTS_INSTANCING_ON
 
-            // func switch
-            #pragma multi_compile _ GRID_ON
-
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
             
@@ -84,35 +80,11 @@ Shader "JS/Env/TerrainLit"
             };
 
             #include "Assets/World/Shader/Library/HexCellData.hlsl"
-
-            TEXTURE2D_ARRAY(_BaseMaps);
-            SAMPLER(sampler_BaseMaps);
-
-            TEXTURE2D_ARRAY(_BumpMaps);
-            SAMPLER(sampler_BumpMaps);
-
-            TEXTURE2D(_GridTex);
-            SAMPLER(sampler_GridTex);
             
-            float4 _BaseMaps_ST;
-            float4 _BumpMaps_ST;
-
-            float4 GetTerrainColor (Varyings input, int index) {
-		        float3 uvw = float3(input.positionWS.xz * 0.02 * _BaseMaps_ST.xy, input.terrain[index]);
-		        float4 c = _BaseMaps.Sample(sampler_BaseMaps, uvw);
-		        return c * (input.color[index] * input.visibility[index]);
-	        }
-
-            float3 GetTerrainNormal (Varyings input, int index) {
-                float3 uvw = float3(input.positionWS.xz * 0.02 * _BumpMaps_ST.xy, input.terrain[index]);
-                half3 NormalTS = UnpackNormalScale(_BumpMaps.Sample(sampler_BumpMaps, uvw), 1.0);
-		        return NormalTS;
-	        }
-
-            float4 GetTerrainNormalRGB (Varyings input, int index) {
-                float3 uvw = float3(input.positionWS.xz * 0.02 * _BumpMaps_ST.xy, input.terrain[index]);
-                return _BumpMaps.Sample(sampler_BumpMaps, uvw);
-	        }
+            TEXTURE2D(_GridCoordinates);
+            SAMPLER(sampler_GridCoordinates);
+            
+            float4 _GridCoordinates_ST;
 
             // Used in Standard (Physically Based) shader
             Varyings LitPassVertex(AttributesTerrainLighting input)
@@ -134,19 +106,15 @@ Shader "JS/Env/TerrainLit"
                 output.positionWS = vertexInput.positionWS;
                 output.positionCS = vertexInput.positionCS;
 
-		        float4 cell0 = GetCellData(input, 0);
-		        float4 cell1 = GetCellData(input, 1);
-		        float4 cell2 = GetCellData(input, 2);
-
-		        output.terrain.x = cell0.w;
-		        output.terrain.y = cell1.w;
-		        output.terrain.z = cell2.w;
-
-                output.visibility.x = cell0.x;
-			    output.visibility.y = cell1.x;
-			    output.visibility.z = cell2.x;
-                output.visibility = lerp(0.25, 1, output.visibility);
+                float4 gridUV = float4(output.positionWS.xz, 0, 0);
+                gridUV.x *= 1 / (4 * 8.66025404);
+			    gridUV.y *= 1 / (2 * 15.0);
+                float2 cellDataCoordinates = floor(gridUV.xy) + SAMPLE_TEXTURE2D_LOD(_GridCoordinates, sampler_GridCoordinates, gridUV.xy, gridUV.w);
+                cellDataCoordinates *= 2;
                 
+			    output.visibility = GetCellData(cellDataCoordinates).x;
+			    output.visibility = lerp(0.25, 1, output.visibility);
+
                 output.color = input.color;
 
                 return output;
@@ -169,38 +137,19 @@ Shader "JS/Env/TerrainLit"
                 half3 worldBinnormal = normalize(cross(worldNormal, worldTangent) * input.tangentWS.w);
                 half3x3 TBN = half3x3(worldTangent, worldBinnormal, worldNormal);
 
-                half3 NormalTS = GetTerrainNormal(input, 0) +
-				    GetTerrainNormal(input, 1) +
-				    GetTerrainNormal(input, 2);
-
-                half4 NormalRGB = GetTerrainNormalRGB(input, 0) +
-				GetTerrainNormalRGB(input, 1) +
-				GetTerrainNormalRGB(input, 2);
-
+                half3 NormalTS = UnpackNormalScale(_BumpMap.Sample(sampler_BumpMap, uv), 1.0);
                 worldNormal = normalize(mul(NormalTS,TBN));
                 
                 //材质参数
-			    half3 baseColor =
-				    GetTerrainColor(input, 0) +
-				    GetTerrainColor(input, 1) +
-				    GetTerrainColor(input, 2);
+			    half3 baseColor = _BaseMap.Sample(sampler_BaseMap, uv) * input.visibility;
 
-                half roughness = (1 - NormalRGB.b) * _Smoothness;
+                half roughness = 1 - _Smoothness;
                 roughness = max(roughness,0.001f);
-                half metallic = NormalRGB.a * _Metallic;
+                half metallic = _Metallic;
+                
                 //BRDF
                 half3 diffuseColor = lerp(baseColor * _BaseColor, float3(0.0,0.0,0.0), metallic);
                 half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
-
-                //格子绘制
-                #if defined(GRID_ON)
-                    float2 gridUV = worldPos.xz;
-                    gridUV.x *= 1 / (4 * 8.66025404);
-                    gridUV.y *= 1 / (2 * 15.0);
-                    float4 gridColor = _GridTex.Sample(sampler_GridTex, gridUV);
-                    diffuseColor *= gridColor;
-                #endif
-     
 
                 //主光源
                 half3 directLighting = half3(0, 0, 0);

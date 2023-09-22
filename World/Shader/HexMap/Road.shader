@@ -21,18 +21,16 @@ Shader "JS/Env/Road"
 
             #include "UnityCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float3 posWS : TEXCOORD1;
+                float visibility : TEXCOORD2;
                 float4 posCS : SV_POSITION;
             };
+
+            #include "Assets/World/Shader/Library/CommonInput.hlsl"
+            #include "Assets/World/Shader/Library/HexCellData.hlsl"
 
             sampler2D _MainTex;
 
@@ -41,12 +39,18 @@ Shader "JS/Env/Road"
             half4 _Color;
             CBUFFER_END
 
-            v2f vert (appdata v)
+            v2f vert (AttributesTerrainLighting v)
             {
                 v2f o;
-                o.posCS = UnityObjectToClipPos(v.vertex);
-                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.posCS = UnityObjectToClipPos(v.positionOS);
+                o.posWS = mul(unity_ObjectToWorld, v.positionOS).xyz;
+                o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+
+	            float4 cell0 = GetCellData(v, 0);
+	            float4 cell1 = GetCellData(v, 1);
+
+	            o.visibility = cell0.x * v.color.x + cell1.x * v.color.y;
+	            o.visibility = lerp(0.25, 1, o.visibility);
                 
                 return o;
             }
@@ -59,7 +63,7 @@ Shader "JS/Env/Road"
                 blend = smoothstep(0.4, 0.7, blend);
 
                 _Color.a = blend;
-                half4 finalCol = _Color * (noise.y * 0.75 + 0.25);
+                half4 finalCol = _Color * ((noise.y * 0.75 + 0.25) * i.visibility); 
                 
                 return finalCol;
             }

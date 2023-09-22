@@ -21,16 +21,14 @@ Shader "JS/Env/Water"
             #include "UnityCG.cginc"
             #include "WaterCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
+            #include "Assets/World/Shader/Library/CommonInput.hlsl"
+            #include "Assets/World/Shader/Library/HexCellData.hlsl"
+            
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float3 posWS : TEXCOORD1;
+                float visibility : TEXCOORD2;
                 float4 posCS : SV_POSITION;
             };
 
@@ -41,12 +39,21 @@ Shader "JS/Env/Water"
             half4 _Color;
             CBUFFER_END
 
-            v2f vert (appdata v)
+            v2f vert (AttributesTerrainLighting v)
             {
                 v2f o;
-                o.posCS = UnityObjectToClipPos(v.vertex);
-                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.posCS = UnityObjectToClipPos(v.positionOS);
+                o.posWS = mul(unity_ObjectToWorld, v.positionOS).xyz;
                 o.uv = o.posWS.xz;
+                
+			    float4 cell0 = GetCellData(v, 0);
+			    float4 cell1 = GetCellData(v, 1);
+			    float4 cell2 = GetCellData(v, 2);
+
+			    o.visibility =
+				    cell0.x * v.color.x + cell1.x * v.color.y + cell2.x * v.color.z;
+			    o.visibility = lerp(0.25, 1, o.visibility);
+                
                 return o;
             }
 
@@ -55,7 +62,7 @@ Shader "JS/Env/Water"
                 half waves = Waves(i.posWS.xz, _MainTex);
                 half4 color = saturate(_Color + waves);
                 
-                half4 finalCol = color;
+                half4 finalCol = color * i.visibility;
                 
                 return finalCol;
             }

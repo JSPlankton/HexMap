@@ -22,17 +22,15 @@ Shader "JS/Env/River"
             #include "UnityCG.cginc"
             #include "WaterCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
             struct v2f
             {
                 float2 uv : TEXCOORD0;
+                float visibility : TEXCOORD1;
                 float4 vertex : SV_POSITION;
             };
+
+            #include "Assets/World/Shader/Library/CommonInput.hlsl"
+            #include "Assets/World/Shader/Library/HexCellData.hlsl"
 
             sampler2D _MainTex;
 
@@ -41,11 +39,17 @@ Shader "JS/Env/River"
             half4 _Color;
             CBUFFER_END
 
-            v2f vert (appdata v)
+            v2f vert (AttributesTerrainLighting v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.vertex = UnityObjectToClipPos(v.positionOS);
+                o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+
+                float4 cell0 = GetCellData(v, 0);
+		        float4 cell1 = GetCellData(v, 1);
+
+		        o.visibility = cell0.x * v.color.x + cell1.x * v.color.y;
+		        o.visibility = lerp(0.25, 1, o.visibility);
 
                 return o;
             }
@@ -54,6 +58,7 @@ Shader "JS/Env/River"
             {
                 float river = River(i.uv, _MainTex);
                 half4 finalCol = saturate(_Color + river);
+                finalCol.rgb *= i.visibility;
                 
                 return finalCol;
             }

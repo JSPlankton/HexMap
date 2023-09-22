@@ -1,6 +1,7 @@
 #ifndef STANDARD_LIGHTING_INCLUDE
 #define STANDARD_LIGHTING_INCLUDE
 #include "LightingCommon.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
 #ifndef UNITY_PI
 #define UNITY_PI 3.14159265358979323846

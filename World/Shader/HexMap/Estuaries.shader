@@ -21,20 +21,17 @@ Shader "JS/Env/Estuaries"
             #include "UnityCG.cginc"
             #include "WaterCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-                float2 uv2 : TEXCOORD1;
-            };
-
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float2 uv2 : TEXCOORD1;
                 float3 posWS : TEXCOORD2;
+                float visibility : TEXCOORD3;
                 float4 posCS : SV_POSITION;
             };
+
+            #include "Assets/World/Shader/Library/CommonInput.hlsl"
+            #include "Assets/World/Shader/Library/HexCellData.hlsl"
 
             sampler2D _MainTex;
 
@@ -43,13 +40,20 @@ Shader "JS/Env/Estuaries"
             half4 _Color;
             CBUFFER_END
 
-            v2f vert (appdata v)
+            v2f vert (AttributesTerrainLightingUV2 v)
             {
                 v2f o;
-                o.posCS = UnityObjectToClipPos(v.vertex);
-                o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.uv2 = v.uv2;
+                o.posCS = UnityObjectToClipPos(v.positionOS);
+                o.posWS = mul(unity_ObjectToWorld, v.positionOS).xyz;
+                o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+                o.uv2 = v.texcoord2;
+
+                float4 cell0 = GetCellData(v, 0);
+			    float4 cell1 = GetCellData(v, 1);
+
+			    o.visibility = cell0.x * v.color.x + cell1.x * v.color.y;
+			    o.visibility = lerp(0.25, 1, o.visibility);
+                
                 return o;
             }
 
@@ -66,6 +70,7 @@ Shader "JS/Env/Estuaries"
 
                 
                 half4 finalCol = saturate(_Color + water);
+                finalCol.rgb *= i.visibility;
                 
                 return finalCol;
             }

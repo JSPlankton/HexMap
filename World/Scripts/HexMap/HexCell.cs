@@ -11,6 +11,13 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
+        public bool IsVisible {
+            get {
+                return visibility > 0;
+            }
+        }
+
+        public HexCellShaderData ShaderData { get; set; }
         public HexUnit Unit { get; set; }
         public HexCell PathFrom { get; set; }
         public int SearchHeuristic { get; set; }
@@ -31,10 +38,13 @@ namespace JS.HexMap
             set {
                 if (terrainTypeIndex != value) {
                     terrainTypeIndex = value;
-                    Refresh();
+                    ShaderData.RefreshTerrain(this);
                 }
             }
         }
+        
+        public int Index { get; set; }
+        
         private int terrainTypeIndex;
         private int distance;
 
@@ -191,6 +201,21 @@ namespace JS.HexMap
         public bool IsSpecial {
             get {
                 return specialIndex > 0;
+            }
+        }
+        
+        int visibility;
+        public void IncreaseVisibility () {
+            visibility += 1;
+            if (visibility == 1) {
+                ShaderData.RefreshVisibility(this);
+            }
+        }
+
+        public void DecreaseVisibility () {
+            visibility -= 1;
+            if (visibility == 0) {
+                ShaderData.RefreshVisibility(this);
             }
         }
 
@@ -483,6 +508,7 @@ namespace JS.HexMap
 
         public void Load (BinaryReader reader) {
             terrainTypeIndex = reader.ReadByte();
+            ShaderData.RefreshTerrain(this);
             elevation = reader.ReadByte();
             RefreshPosition();
             waterLevel = reader.ReadByte();
