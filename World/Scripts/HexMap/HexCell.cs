@@ -13,10 +13,20 @@ namespace JS.HexMap
         public HexGridChunk chunk;
         public bool IsVisible {
             get {
-                return visibility > 0;
+                return visibility > 0 && Explorable;
             }
         }
-
+        
+        //视野高度
+        public int ViewElevation {
+            get {
+                return elevation >= waterLevel ? elevation : waterLevel;
+            }
+        }
+        
+        //单元格能否被探索
+        public bool Explorable { get; set; }
+        
         public HexCellShaderData ShaderData { get; set; }
         public HexUnit Unit { get; set; }
         public HexCell PathFrom { get; set; }
@@ -110,7 +120,11 @@ namespace JS.HexMap
                 if (elevation == value) {
                     return;
                 }
+                int originalViewElevation = ViewElevation;
                 elevation = value;
+                if (ViewElevation != originalViewElevation) {
+                    ShaderData.ViewElevationChanged();
+                }
                 RefreshPosition();
                 ValidateRivers();
                 //如果单元格高度差过大，需要切断道路
@@ -149,7 +163,11 @@ namespace JS.HexMap
                 if (waterLevel == value) {
                     return;
                 }
+                int originalViewElevation = ViewElevation;
                 waterLevel = value;
+                if (ViewElevation != originalViewElevation) {
+                    ShaderData.ViewElevationChanged();
+                }
                 ValidateRivers();
                 Refresh();
             }
@@ -285,7 +303,16 @@ namespace JS.HexMap
             }
         }
         
-        public bool IsExplored { get; private set; }
+        public bool IsExplored {
+            get {
+                return explored && Explorable;
+            }
+            private set {
+                explored = value;
+            }
+        }
+        
+        bool explored;
         
         public HexDirection RiverBeginOrEndDirection
         {
@@ -565,6 +592,13 @@ namespace JS.HexMap
             Image highlight = uiRect.GetChild(0).GetComponent<Image>();
             highlight.color = color;
             highlight.enabled = true;
+        }
+        
+        public void ResetVisibility () {
+            if (visibility > 0) {
+                visibility = 0;
+                ShaderData.RefreshVisibility(this);
+            }
         }
     }
 }

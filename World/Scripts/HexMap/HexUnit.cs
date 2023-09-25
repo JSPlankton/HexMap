@@ -48,6 +48,11 @@ namespace JS.HexMap
                 return 24;
             }
         }
+        public int VisionRange {
+            get {
+                return 3;
+            }
+        }
 
         public void ValidateLocation () {
             transform.localPosition = location.Position;
