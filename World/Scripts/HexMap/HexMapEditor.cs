@@ -40,6 +40,10 @@ namespace JS.HexMap
         {
             ShowGrid(false);
             SetEditCompState(false);
+            
+            terrainMaterial.DisableKeyword("GRID_ON");
+            Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+
         }
 
         void Update () {
