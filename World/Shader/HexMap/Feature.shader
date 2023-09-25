@@ -10,6 +10,8 @@ Shader "JS/Env/Feature"
         _Smoothness("_Smoothness",Range(0.0,1.0)) = 1.0
         
         [NoScaleOffset] _GridCoordinates ("Grid Coordinates", 2D) = "white" {}
+        
+        _BackgroundColor ("Background Color", Color) = (0,0,0)
     }
 
     SubShader
@@ -55,6 +57,9 @@ Shader "JS/Env/Feature"
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+
+            // func switch
+            #pragma multi_compile _ HEX_MAP_EDIT_MODE
             
             //--------------------------------------
             // GPU Instancing
@@ -73,7 +78,7 @@ Shader "JS/Env/Feature"
                 float3 normalWS                 : TEXCOORD2;
                 half4 tangentWS                 : TEXCOORD3;
                 float3 terrain                  : TEXCOORD4;
-                float3 visibility               : TEXCOORD5;
+                float2 visibility               : TEXCOORD5;
                 float4 positionCS               : SV_POSITION;
                 float4 color                    : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -85,6 +90,7 @@ Shader "JS/Env/Feature"
             SAMPLER(sampler_GridCoordinates);
             
             float4 _GridCoordinates_ST;
+            half3 _BackgroundColor;
 
             // Used in Standard (Physically Based) shader
             Varyings LitPassVertex(AttributesTerrainLighting input)
@@ -112,8 +118,10 @@ Shader "JS/Env/Feature"
                 float2 cellDataCoordinates = floor(gridUV.xy) + SAMPLE_TEXTURE2D_LOD(_GridCoordinates, sampler_GridCoordinates, gridUV.xy, gridUV.w);
                 cellDataCoordinates *= 2;
                 
-			    output.visibility = GetCellData(cellDataCoordinates).x;
-			    output.visibility = lerp(0.25, 1, output.visibility);
+			    float4 cellData = GetCellData(cellDataCoordinates);
+			    output.visibility.x = cellData.x;
+			    output.visibility.x = lerp(0.25, 1, output.visibility.x);
+			    output.visibility.y = cellData.y;
 
                 output.color = input.color;
 
@@ -141,7 +149,7 @@ Shader "JS/Env/Feature"
                 worldNormal = normalize(mul(NormalTS,TBN));
                 
                 //材质参数
-			    half3 baseColor = _BaseMap.Sample(sampler_BaseMap, uv) * input.visibility;
+			    half3 baseColor = _BaseMap.Sample(sampler_BaseMap, uv);
 
                 half roughness = 1 - _Smoothness;
                 roughness = max(roughness,0.001f);
@@ -150,15 +158,24 @@ Shader "JS/Env/Feature"
                 //BRDF
                 half3 diffuseColor = lerp(baseColor * _BaseColor, float3(0.0,0.0,0.0), metallic);
                 half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
+                
+                float explored = input.visibility.y;
+                diffuseColor *= explored;
+                specularColor *= explored;
+
+                float ao = 1;
+                ao *= explored;
 
                 //主光源
                 half3 directLighting = half3(0, 0, 0);
                 DirectLighting_float(diffuseColor, specularColor, roughness, worldPos, worldNormal, viewDir, directLighting);
 
                 half3 indirectLighting = half3(0,0,0);
-                IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,1,0,indirectLighting);
+                IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,ao,0,indirectLighting);
 
                 outColor = half4(directLighting + indirectLighting, 1.0f);
+
+                outColor.xyz += (_BackgroundColor * (1 - explored));
             }
             
 

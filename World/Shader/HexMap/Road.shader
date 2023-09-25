@@ -21,11 +21,14 @@ Shader "JS/Env/Road"
 
             #include "UnityCG.cginc"
 
+            // func switch
+            #pragma multi_compile _ HEX_MAP_EDIT_MODE
+
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float3 posWS : TEXCOORD1;
-                float visibility : TEXCOORD2;
+                float2 visibility : TEXCOORD2;
                 float4 posCS : SV_POSITION;
             };
 
@@ -49,8 +52,9 @@ Shader "JS/Env/Road"
 	            float4 cell0 = GetCellData(v, 0);
 	            float4 cell1 = GetCellData(v, 1);
 
-	            o.visibility = cell0.x * v.color.x + cell1.x * v.color.y;
-	            o.visibility = lerp(0.25, 1, o.visibility);
+			    o.visibility.x = cell0.x * v.color.x + cell1.x * v.color.y;
+			    o.visibility.x = lerp(0.25, 1, o.visibility.x);
+			    o.visibility.y = cell0.y * v.color.x + cell1.y * v.color.y;
                 
                 return o;
             }
@@ -63,7 +67,10 @@ Shader "JS/Env/Road"
                 blend = smoothstep(0.4, 0.7, blend);
 
                 _Color.a = blend;
-                half4 finalCol = _Color * ((noise.y * 0.75 + 0.25) * i.visibility); 
+                half4 finalCol = _Color * ((noise.y * 0.75 + 0.25) * i.visibility.x);
+
+                float explored = i.visibility.y;
+                finalCol.a *= explored;
                 
                 return finalCol;
             }

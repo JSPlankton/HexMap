@@ -20,6 +20,9 @@ Shader "JS/Env/WaterShore"
 
             #include "UnityCG.cginc"
             #include "WaterCG.cginc"
+
+            // func switch
+            #pragma multi_compile _ HEX_MAP_EDIT_MODE
             
             #include "Assets/World/Shader/Library/CommonInput.hlsl"
             #include "Assets/World/Shader/Library/HexCellData.hlsl"
@@ -28,7 +31,7 @@ Shader "JS/Env/WaterShore"
             {
                 float2 uv : TEXCOORD0;
                 float3 posWS : TEXCOORD1;
-                float visibility : TEXCOORD2;
+                float2 visibility : TEXCOORD2;
                 float4 posCS : SV_POSITION;
             };
 
@@ -50,9 +53,11 @@ Shader "JS/Env/WaterShore"
 			    float4 cell1 = GetCellData(v, 1);
 			    float4 cell2 = GetCellData(v, 2);
 
-			    o.visibility =
+			    o.visibility.x =
 				    cell0.x * v.color.x + cell1.x * v.color.y + cell2.x * v.color.z;
-			    o.visibility = lerp(0.25, 1, o.visibility);   
+			    o.visibility.x = lerp(0.25, 1, o.visibility.x);
+			    o.visibility.y =
+				    cell0.y * v.color.x + cell1.y * v.color.y + cell2.y * v.color.z;
                 
                 return o;
             }
@@ -65,7 +70,10 @@ Shader "JS/Env/WaterShore"
 			    waves *= 1 - shore;
                 
                 half4 finalCol = saturate(_Color + max(foam, waves));
-                finalCol.rgb *= i.visibility;
+                finalCol.rgb *= i.visibility.x;
+
+                float explored = i.visibility.y;
+                finalCol.a *= explored;
                 
                 return finalCol;
             }

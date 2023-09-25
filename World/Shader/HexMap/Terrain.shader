@@ -10,6 +10,8 @@ Shader "JS/Env/TerrainLit"
         
         _Metallic("Metallic",Range(0.0,1.0)) = 1.0
         _Smoothness("_Smoothness",Range(0.0,1.0)) = 1.0
+        
+        _BackgroundColor ("Background Color", Color) = (0,0,0)
     }
 
     SubShader
@@ -65,6 +67,7 @@ Shader "JS/Env/TerrainLit"
 
             // func switch
             #pragma multi_compile _ GRID_ON
+            #pragma multi_compile _ HEX_MAP_EDIT_MODE
 
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
@@ -77,7 +80,7 @@ Shader "JS/Env/TerrainLit"
                 float3 normalWS                 : TEXCOORD2;
                 half4 tangentWS                 : TEXCOORD3;
                 float3 terrain                  : TEXCOORD4;
-                float3 visibility               : TEXCOORD5;
+                float4 visibility               : TEXCOORD5;
                 float4 positionCS               : SV_POSITION;
                 float4 color                    : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -96,6 +99,8 @@ Shader "JS/Env/TerrainLit"
             
             float4 _BaseMaps_ST;
             float4 _BumpMaps_ST;
+
+            half3 _BackgroundColor;
 
             float4 GetTerrainColor (Varyings input, int index) {
 		        float3 uvw = float3(input.positionWS.xz * 0.02 * _BaseMaps_ST.xy, input.terrain[index]);
@@ -145,7 +150,9 @@ Shader "JS/Env/TerrainLit"
                 output.visibility.x = cell0.x;
 			    output.visibility.y = cell1.x;
 			    output.visibility.z = cell2.x;
-                output.visibility = lerp(0.25, 1, output.visibility);
+                output.visibility.xyz = lerp(0.25, 1, output.visibility.xyz);
+                output.visibility.w =
+				cell0.y * input.color.x + cell1.y * input.color.y + cell2.y * input.color.z;
                 
                 output.color = input.color;
 
@@ -191,7 +198,7 @@ Shader "JS/Env/TerrainLit"
                 //BRDF
                 half3 diffuseColor = lerp(baseColor * _BaseColor, float3(0.0,0.0,0.0), metallic);
                 half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
-
+                
                 //格子绘制
                 #if defined(GRID_ON)
                     float2 gridUV = worldPos.xz;
@@ -200,16 +207,24 @@ Shader "JS/Env/TerrainLit"
                     float4 gridColor = _GridTex.Sample(sampler_GridTex, gridUV);
                     diffuseColor *= gridColor;
                 #endif
-     
+
+                float explored = input.visibility.w;
+                diffuseColor *= explored;
+                specularColor *= explored;
+
+                float ao = 1;
+                ao *= explored;
 
                 //主光源
                 half3 directLighting = half3(0, 0, 0);
                 DirectLighting_float(diffuseColor, specularColor, roughness, worldPos, worldNormal, viewDir, directLighting);
 
                 half3 indirectLighting = half3(0,0,0);
-                IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,1,0,indirectLighting);
+                IndirectLighting_float(diffuseColor,specularColor,roughness,worldPos,worldNormal,viewDir,ao,0,indirectLighting);
 
                 outColor = half4(directLighting + indirectLighting, 1.0f);
+
+                outColor.xyz += (_BackgroundColor * (1 - explored));
             }
             
 

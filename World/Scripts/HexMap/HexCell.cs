@@ -208,6 +208,7 @@ namespace JS.HexMap
         public void IncreaseVisibility () {
             visibility += 1;
             if (visibility == 1) {
+                IsExplored = true;
                 ShaderData.RefreshVisibility(this);
             }
         }
@@ -283,6 +284,8 @@ namespace JS.HexMap
                     HexMetrics.elevationStep;
             }
         }
+        
+        public bool IsExplored { get; private set; }
         
         public HexDirection RiverBeginOrEndDirection
         {
@@ -504,9 +507,10 @@ namespace JS.HexMap
                 }
             }
             writer.Write((byte)roadFlags);
+            writer.Write(IsExplored);
         }
 
-        public void Load (BinaryReader reader) {
+        public void Load (BinaryReader reader, int header) {
             terrainTypeIndex = reader.ReadByte();
             ShaderData.RefreshTerrain(this);
             elevation = reader.ReadByte();
@@ -540,6 +544,9 @@ namespace JS.HexMap
             for (int i = 0; i < roads.Length; i++) {
                 roads[i] = (roadFlags & (1 << i)) != 0;
             }
+            
+            IsExplored = header >= 3 ? reader.ReadBoolean() : false;
+            ShaderData.RefreshVisibility(this);
         }
         
         public void SetLabel (string text) {

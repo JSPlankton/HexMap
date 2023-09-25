@@ -1658,11 +1658,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 748340232567542375, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
-        type: 3}
-      propertyPath: m_RenderPostProcessing
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1224852354609948997, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
         type: 3}
       propertyPath: grid
@@ -1677,6 +1672,26 @@ PrefabInstance:
         type: 3}
       propertyPath: stickMinZoom
       value: -320
+      objectReference: {fileID: 0}
+    - target: {fileID: 2720200812921295700, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
+        type: 3}
+      propertyPath: m_ClearFlags
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2720200812921295700, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0.35686275
+      objectReference: {fileID: 0}
+    - target: {fileID: 2720200812921295700, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0.38039216
+      objectReference: {fileID: 0}
+    - target: {fileID: 2720200812921295700, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0.40784314
       objectReference: {fileID: 0}
     - target: {fileID: 4710255712919331145, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
         type: 3}

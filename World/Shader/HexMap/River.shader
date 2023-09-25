@@ -22,10 +22,13 @@ Shader "JS/Env/River"
             #include "UnityCG.cginc"
             #include "WaterCG.cginc"
 
+            // func switch
+            #pragma multi_compile _ HEX_MAP_EDIT_MODE
+
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float visibility : TEXCOORD1;
+                float2 visibility : TEXCOORD1;
                 float4 vertex : SV_POSITION;
             };
 
@@ -48,8 +51,9 @@ Shader "JS/Env/River"
                 float4 cell0 = GetCellData(v, 0);
 		        float4 cell1 = GetCellData(v, 1);
 
-		        o.visibility = cell0.x * v.color.x + cell1.x * v.color.y;
-		        o.visibility = lerp(0.25, 1, o.visibility);
+			    o.visibility.x = cell0.x * v.color.x + cell1.x * v.color.y;
+			    o.visibility.x = lerp(0.25, 1, o.visibility.x);
+			    o.visibility.y = cell0.y * v.color.x + cell1.y * v.color.y;
 
                 return o;
             }
@@ -58,7 +62,10 @@ Shader "JS/Env/River"
             {
                 float river = River(i.uv, _MainTex);
                 half4 finalCol = saturate(_Color + river);
-                finalCol.rgb *= i.visibility;
+                finalCol.rgb *= i.visibility.x;
+
+                float explored = i.visibility.y;
+                finalCol.a *= explored;
                 
                 return finalCol;
             }

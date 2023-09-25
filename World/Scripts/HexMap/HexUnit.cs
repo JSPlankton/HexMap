@@ -42,13 +42,19 @@ namespace JS.HexMap
         }
 
         float orientation;
+        
+        public int Speed {
+            get {
+                return 24;
+            }
+        }
 
         public void ValidateLocation () {
             transform.localPosition = location.Position;
         }
         
         public bool IsValidDestination (HexCell cell) {
-            return !cell.IsUnderwater && !cell.Unit;;
+            return cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
         }
         
         public void Die () {
@@ -143,6 +149,28 @@ namespace JS.HexMap
                 transform.LookAt(point);
                 orientation = transform.localRotation.eulerAngles.y;
             }
+        }
+        
+        public int GetMoveCost (
+            HexCell fromCell, HexCell toCell, HexDirection direction)
+        {
+            HexEdgeType edgeType = fromCell.GetEdgeType(toCell);
+            if (edgeType == HexEdgeType.Cliff) {
+                return -1;
+            }
+            int moveCost;
+            if (fromCell.HasRoadThroughEdge(direction)) {
+                moveCost = 1;
+            }
+            else if (fromCell.Walled != toCell.Walled) {
+                return -1;
+            }
+            else {
+                moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
+                moveCost +=
+                    toCell.UrbanLevel + toCell.FarmLevel + toCell.PlantLevel;
+            }
+            return moveCost;
         }
 
         #region LifeCircle
