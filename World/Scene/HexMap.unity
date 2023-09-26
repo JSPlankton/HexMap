@@ -211,14 +211,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 176813519}
-  m_LocalRotation: {x: 0.3660345, y: -0.43721265, z: 0.13934834, w: 0.80959624}
+  m_LocalRotation: {x: 0.27059805, y: 0.6532815, z: -0.27059805, w: 0.6532815}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 45.605, y: -60.007, z: -7.758}
+  m_LocalEulerAnglesHint: {x: 45, y: 90, z: 0}
 --- !u!114 &176813522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -400,6 +400,7 @@ MonoBehaviour:
   regionBorder: 5
   regionCount: 1
   erosionPercentage: 50
+  startingMoisture: 0.1
   evaporationFactor: 0.5
   precipitationFactor: 0.25
   runoffFactor: 0.25
