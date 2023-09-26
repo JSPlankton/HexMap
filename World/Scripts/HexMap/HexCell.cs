@@ -603,5 +603,9 @@ namespace JS.HexMap
                 ShaderData.RefreshVisibility(this);
             }
         }
+        
+        public void SetMapData (float data) {
+            ShaderData.SetMapData(this, data);
+        }
     }
 }

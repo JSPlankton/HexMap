@@ -384,10 +384,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 1225880572}
+  useFixedSeed: 0
+  seed: 0
   jitterProbability: 0.25
   chunkSizeMin: 30
   chunkSizeMax: 100
+  highRiseProbability: 0.25
+  sinkProbability: 0.2
   landPercentage: 50
+  waterLevel: 3
+  elevationMinimum: -2
+  elevationMaximum: 8
+  mapBorderX: 5
+  mapBorderZ: 5
+  regionBorder: 5
+  regionCount: 1
+  erosionPercentage: 50
+  evaporationFactor: 0.5
+  precipitationFactor: 0.25
+  runoffFactor: 0.25
+  seepageFactor: 0.125
+  windDirection: 5
+  windStrength: 4
 --- !u!4 &669133240
 Transform:
   m_ObjectHideFlags: 0
@@ -1730,7 +1748,7 @@ PrefabInstance:
     - target: {fileID: 1224852354609948997, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
         type: 3}
       propertyPath: stickMinZoom
-      value: -400
+      value: -800
       objectReference: {fileID: 0}
     - target: {fileID: 2720200812921295700, guid: ab75ad7ad83838147b14a43ecbc8ddc4,
         type: 3}

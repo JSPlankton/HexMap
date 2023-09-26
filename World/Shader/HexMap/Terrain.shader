@@ -12,6 +12,7 @@ Shader "JS/Env/TerrainLit"
         _Smoothness("_Smoothness",Range(0.0,1.0)) = 1.0
         
         _BackgroundColor ("Background Color", Color) = (0,0,0)
+        [Toggle(SHOW_MAP_DATA)] _ShowMapData ("Show Map Data", Float) = 0
     }
 
     SubShader
@@ -69,6 +70,8 @@ Shader "JS/Env/TerrainLit"
             #pragma multi_compile _ GRID_ON
             #pragma multi_compile _ HEX_MAP_EDIT_MODE
 
+            #pragma shader_feature SHOW_MAP_DATA
+
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
             
@@ -81,6 +84,9 @@ Shader "JS/Env/TerrainLit"
                 half4 tangentWS                 : TEXCOORD3;
                 float3 terrain                  : TEXCOORD4;
                 float4 visibility               : TEXCOORD5;
+                #if defined(SHOW_MAP_DATA)
+				float mapData                   : TEXCOORD6;
+			    #endif
                 float4 positionCS               : SV_POSITION;
                 float4 color                    : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -153,6 +159,12 @@ Shader "JS/Env/TerrainLit"
                 output.visibility.xyz = lerp(0.25, 1, output.visibility.xyz);
                 output.visibility.w =
 				cell0.y * input.color.x + cell1.y * input.color.y + cell2.y * input.color.z;
+
+                #if defined(SHOW_MAP_DATA)
+				output.mapData = cell0.z * input.color.x + cell1.z * input.color.y +
+					cell2.z * input.color.z;
+			    #endif
+
                 
                 output.color = input.color;
 
@@ -200,6 +212,7 @@ Shader "JS/Env/TerrainLit"
                 half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
                 
                 //格子绘制
+            	float4 gridColor = 1;
                 #if defined(GRID_ON)
                     float2 gridUV = worldPos.xz;
                     gridUV.x *= 1 / (4 * 8.66025404);
@@ -207,13 +220,17 @@ Shader "JS/Env/TerrainLit"
                     float4 gridColor = _GridTex.Sample(sampler_GridTex, gridUV);
                     diffuseColor *= gridColor;
                 #endif
-
+                
                 float explored = input.visibility.w;
                 diffuseColor *= explored;
                 specularColor *= explored;
 
                 float ao = 1;
                 ao *= explored;
+
+                #if defined(SHOW_MAP_DATA)
+				diffuseColor = input.mapData * gridColor;
+				#endif
 
                 //主光源
                 half3 directLighting = half3(0, 0, 0);

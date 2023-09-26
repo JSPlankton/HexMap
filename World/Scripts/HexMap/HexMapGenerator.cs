@@ -37,6 +37,20 @@ namespace JS.HexMap
         public int regionCount = 1;
         [Range(0, 100)]
         public int erosionPercentage = 50;
+        [Range(0f, 1f)][Tooltip("气候-初始湿度")]
+        public float startingMoisture = 0.1f;
+        [Range(0f, 1f)][Tooltip("气候-水分蒸发")]
+        public float evaporationFactor  = 0.5f;
+        [Range(0f, 1f)][Tooltip("气候-水分沉降")]
+        public float precipitationFactor = 0.25f;
+        [Range(0f, 1f)][Tooltip("气候-水分流失(流向较低区域)")]
+        public float runoffFactor = 0.25f;
+        [Range(0f, 1f)][Tooltip("气候-水分渗透")]
+        public float seepageFactor = 0.125f;
+        [Tooltip("气候-风向")]
+        public HexDirection windDirection = HexDirection.NW;
+        [Range(1f, 10f)][Tooltip("气候-风的强度")]
+        public float windStrength = 4f;
 
         int cellCount;
         int xMin, xMax, zMin, zMax;
@@ -49,7 +63,16 @@ namespace JS.HexMap
             public int xMin, xMax, zMin, zMax;
         }
 
+        //气候
+        struct ClimateData
+        {
+            //云层，水分
+            public float clouds, moisture;
+        }
+
         List<MapRegion> regions;
+        List<ClimateData> climate = new List<ClimateData>();
+        List<ClimateData> nextClimate = new List<ClimateData>();
         
         public void GenerateMap(int x, int z)
         {
@@ -76,6 +99,7 @@ namespace JS.HexMap
             CreateRegions();
             CreateLand();
             ErodeLand();
+            CreateClimate();
             SetTerrainType();
             
             for (int i = 0; i < cellCount; i++) {
@@ -203,12 +227,38 @@ namespace JS.HexMap
             );
         }
         
+        /// <summary>
+        /// 根据湿度来设置地形类型
+        /// 雪 = 湿度极低
+        /// 沙 = 干旱地区
+        /// 石头，草 = 湿润的土地
+        /// 泥土 = 被浸透的水下单元
+        /// </summary>
         void SetTerrainType () {
             for (int i = 0; i < cellCount; i++) {
                 HexCell cell = grid.GetCell(i);
+                float moisture = climate[i].moisture;
                 if (!cell.IsUnderwater) {
-                    cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
+                    if (moisture < 0.05f) {
+                        cell.TerrainTypeIndex = 4;
+                    }
+                    else if (moisture < 0.12f) {
+                        cell.TerrainTypeIndex = 0;
+                    }
+                    else if (moisture < 0.28f) {
+                        cell.TerrainTypeIndex = 3;
+                    }
+                    else if (moisture < 0.85f) {
+                        cell.TerrainTypeIndex = 1;
+                    }
+                    else {
+                        cell.TerrainTypeIndex = 2;
+                    }
                 }
+                else {
+                    cell.TerrainTypeIndex = 2;
+                }
+                cell.SetMapData(moisture);
             }
         }
         
@@ -362,5 +412,95 @@ namespace JS.HexMap
             ListPool<HexCell>.Add(candidates);
             return target;
         }
+
+        #region 气候
+
+        void CreateClimate () {
+            climate.Clear();
+            nextClimate.Clear();
+            ClimateData initialData = new ClimateData();
+            initialData.moisture = startingMoisture;
+            ClimateData clearData = new ClimateData();
+            
+            for (int i = 0; i < cellCount; i++) {
+                climate.Add(initialData);
+                nextClimate.Add(clearData);
+            }
+            
+            for (int cycle = 0; cycle < 40; cycle++) {
+                for (int i = 0; i < cellCount; i++) {
+                    EvolveClimate(i);
+                }
+                List<ClimateData> swap = climate;
+                climate = nextClimate;
+                nextClimate = swap;
+            }
+        }
+        
+        void EvolveClimate (int cellIndex) {
+            HexCell cell = grid.GetCell(cellIndex);
+            ClimateData cellClimate = climate[cellIndex];
+		
+            if (cell.IsUnderwater) {
+                cellClimate.moisture = 1f;
+                cellClimate.clouds += evaporationFactor;
+            }
+            else {
+                float evaporation = cellClimate.moisture * evaporationFactor;
+                cellClimate.moisture -= evaporation;
+                cellClimate.clouds += evaporation;
+            }
+            
+            float precipitation = cellClimate.clouds * precipitationFactor;
+            cellClimate.clouds -= precipitation;
+            cellClimate.moisture += precipitation;
+            
+            float cloudMaximum = 1f - cell.ViewElevation / (elevationMaximum + 1f);
+            if (cellClimate.clouds > cloudMaximum) {
+                cellClimate.moisture += cellClimate.clouds - cloudMaximum;
+                cellClimate.clouds = cloudMaximum;
+            }
+            
+            HexDirection mainDispersalDirection = windDirection.Opposite();
+            float cloudDispersal = cellClimate.clouds * (1f / (5f + windStrength));
+            float runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
+            float seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
+            
+            for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+                HexCell neighbor = cell.GetNeighbor(d);
+                if (!neighbor) {
+                    continue;
+                }
+                ClimateData neighborClimate = nextClimate[neighbor.Index];
+                if (d == mainDispersalDirection) {
+                    neighborClimate.clouds += cloudDispersal * windStrength;
+                }
+                else {
+                    neighborClimate.clouds += cloudDispersal;
+                }
+                
+                int elevationDelta = neighbor.ViewElevation - cell.ViewElevation;
+                if (elevationDelta < 0) {
+                    cellClimate.moisture -= runoff;
+                    neighborClimate.moisture += runoff;
+                }
+                else if (elevationDelta == 0) {
+                    cellClimate.moisture -= seepage;
+                    neighborClimate.moisture += seepage;
+                }
+                
+                nextClimate[neighbor.Index] = neighborClimate;
+            }
+
+            ClimateData nextCellClimate = nextClimate[cellIndex];
+            nextCellClimate.moisture += cellClimate.moisture;
+            if (nextCellClimate.moisture > 1f) {
+                nextCellClimate.moisture = 1f;
+            }
+            nextClimate[cellIndex] = nextCellClimate;
+            climate[cellIndex] = new ClimateData();
+        }
+
+        #endregion
     }
 }
