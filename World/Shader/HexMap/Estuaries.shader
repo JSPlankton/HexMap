@@ -14,12 +14,11 @@ Shader "JS/Env/Estuaries"
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
-            #include "WaterCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             // func switch
             #pragma multi_compile _ HEX_MAP_EDIT_MODE
@@ -35,8 +34,9 @@ Shader "JS/Env/Estuaries"
 
             #include "Assets/World/Shader/Library/CommonInput.hlsl"
             #include "Assets/World/Shader/Library/HexCellData.hlsl"
+            #include "Assets/World/Shader/Library/WaterData.hlsl"
 
-            sampler2D _MainTex;
+            TEXTURE2D(_MainTex);    SAMPLER(sampler_MainTex);
 
             CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
@@ -46,7 +46,7 @@ Shader "JS/Env/Estuaries"
             v2f vert (AttributesTerrainLightingUV2 v)
             {
                 v2f o;
-                o.posCS = UnityObjectToClipPos(v.positionOS);
+                o.posCS = TransformWorldToHClip(v.positionOS);
                 o.posWS = mul(unity_ObjectToWorld, v.positionOS).xyz;
                 o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
                 o.uv2 = v.texcoord2;
@@ -61,15 +61,15 @@ Shader "JS/Env/Estuaries"
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
 			    float shore = i.uv.y;
-			    float foam = Foam(shore, i.posWS.xz, _MainTex);
-			    float waves = Waves(i.posWS.xz, _MainTex);
+			    float foam = Foam(shore, i.posWS.xz, _MainTex, sampler_MainTex);
+			    float waves = Waves(i.posWS.xz, _MainTex, sampler_MainTex);
 			    waves *= 1 - shore;
 
                 float shoreWater = max(foam, waves);
-			    float river = River(i.uv2, _MainTex);
+			    float river = River(i.uv2, _MainTex, sampler_MainTex);
 			    float water = lerp(shoreWater, river, i.uv.x);
                 
                 half4 finalCol = saturate(_Color + water);
@@ -80,7 +80,7 @@ Shader "JS/Env/Estuaries"
                 
                 return finalCol;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

@@ -14,18 +14,18 @@ Shader "JS/Env/Water"
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
-            #include "WaterCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             // func switch
             #pragma multi_compile _ HEX_MAP_EDIT_MODE
 
             #include "Assets/World/Shader/Library/CommonInput.hlsl"
             #include "Assets/World/Shader/Library/HexCellData.hlsl"
+            #include "Assets/World/Shader/Library/WaterData.hlsl"
             
             struct v2f
             {
@@ -34,8 +34,8 @@ Shader "JS/Env/Water"
                 float2 visibility : TEXCOORD2;
                 float4 posCS : SV_POSITION;
             };
-
-            sampler2D _MainTex;
+            
+            TEXTURE2D(_MainTex);    SAMPLER(sampler_MainTex);
 
             CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
@@ -45,7 +45,7 @@ Shader "JS/Env/Water"
             v2f vert (AttributesTerrainLighting v)
             {
                 v2f o;
-                o.posCS = UnityObjectToClipPos(v.positionOS);
+                o.posCS = TransformWorldToHClip(v.positionOS);
                 o.posWS = mul(unity_ObjectToWorld, v.positionOS).xyz;
                 o.uv = o.posWS.xz;
                 
@@ -62,10 +62,10 @@ Shader "JS/Env/Water"
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
-                half waves = Waves(i.posWS.xz, _MainTex);
-                half4 color = saturate(_Color + waves);
+                half waves = Waves(i.posWS.xz, _MainTex, sampler_MainTex);
+                half4 color = saturate(_Color + waves * 0.25);
                 
                 half4 finalCol = color * i.visibility.x;
 
@@ -74,7 +74,7 @@ Shader "JS/Env/Water"
                 
                 return finalCol;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

@@ -967,7 +967,7 @@ namespace JS.HexMap
 
         if(cell.HasRiverThroughEdge(direction))
         {
-            TriangulateEstuary(e1, e2,cell.HasIncomingRiver&& cell.IncomingRiver==direction, indices);
+            TriangulateEstuary(e1, e2,cell.HasIncomingRiver && cell.IncomingRiver == direction, indices);
         }
         else
         {

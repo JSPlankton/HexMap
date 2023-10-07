@@ -15,12 +15,11 @@ Shader "JS/Env/River"
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
-            #include "WaterCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             // func switch
             #pragma multi_compile _ HEX_MAP_EDIT_MODE
@@ -34,8 +33,9 @@ Shader "JS/Env/River"
 
             #include "Assets/World/Shader/Library/CommonInput.hlsl"
             #include "Assets/World/Shader/Library/HexCellData.hlsl"
+            #include "Assets/World/Shader/Library/WaterData.hlsl"
 
-            sampler2D _MainTex;
+            TEXTURE2D(_MainTex);    SAMPLER(sampler_MainTex);
 
             CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
@@ -45,7 +45,7 @@ Shader "JS/Env/River"
             v2f vert (AttributesTerrainLighting v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.positionOS);
+                o.vertex = TransformWorldToHClip(v.positionOS);
                 o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 
                 float4 cell0 = GetCellData(v, 0);
@@ -58,9 +58,9 @@ Shader "JS/Env/River"
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
-                float river = River(i.uv, _MainTex);
+                float river = River(i.uv, _MainTex, sampler_MainTex) * 0.25;
                 half4 finalCol = saturate(_Color + river);
                 finalCol.rgb *= i.visibility.x;
 
@@ -69,7 +69,7 @@ Shader "JS/Env/River"
                 
                 return finalCol;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

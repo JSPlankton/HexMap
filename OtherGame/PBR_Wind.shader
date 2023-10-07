@@ -41,7 +41,7 @@ Shader "JS/Env/PBR_Wind"
             #pragma exclude_renderers gles gles3 glcore
             #pragma target 4.5
 
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
+            // #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
@@ -90,12 +90,13 @@ Shader "JS/Env/PBR_Wind"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-
+			CBUFFER_START(UnityPerMaterial)
             float _RigOffset;
             float _RippleFreq;
             float _Strength;
             float _OffsetRadio;
             float4 _Dirction;
+            CBUFFER_END
 
             // Used in Standard (Physically Based) shader
             Varyings LitPassVertex(Attributes input)
@@ -129,8 +130,6 @@ Shader "JS/Env/PBR_Wind"
                 output.positionCS = vertexInput.positionCS;
                 
                 output.color = input.color;
-
-
 
                 return output;
             }

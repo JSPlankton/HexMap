@@ -184,19 +184,19 @@ Shader "JS/Env/TerrainLit"
                 float3 worldPos = input.positionWS;
                 half3 viewDir = GetWorldSpaceNormalizeViewDir(input.positionWS);
                 half3 worldNormal = normalize(input.normalWS);
-                half3 worldTangent = normalize(input.tangentWS.xyz);
-                half3 worldBinnormal = normalize(cross(worldNormal, worldTangent) * input.tangentWS.w);
-                half3x3 TBN = half3x3(worldTangent, worldBinnormal, worldNormal);
-
-                half3 NormalTS = GetTerrainNormal(input, 0) +
-				    GetTerrainNormal(input, 1) +
-				    GetTerrainNormal(input, 2);
-
-                half4 NormalRGB = GetTerrainNormalRGB(input, 0) +
-				GetTerrainNormalRGB(input, 1) +
-				GetTerrainNormalRGB(input, 2);
-
-                worldNormal = normalize(mul(NormalTS,TBN));
+        //         half3 worldTangent = normalize(input.tangentWS.xyz);
+        //         half3 worldBinnormal = normalize(cross(worldNormal, worldTangent) * input.tangentWS.w);
+        //         half3x3 TBN = half3x3(worldTangent, worldBinnormal, worldNormal);
+        //
+        //         half3 NormalTS = GetTerrainNormal(input, 0) +
+				    // GetTerrainNormal(input, 1) +
+				    // GetTerrainNormal(input, 2);
+    
+    //             half4 NormalRGB = GetTerrainNormalRGB(input, 0) +
+				// GetTerrainNormalRGB(input, 1) +
+				// GetTerrainNormalRGB(input, 2);
+    
+                // worldNormal = normalize(mul(NormalTS,TBN));
                 
                 //材质参数
 			    half3 baseColor =
@@ -204,9 +204,14 @@ Shader "JS/Env/TerrainLit"
 				    GetTerrainColor(input, 1) +
 				    GetTerrainColor(input, 2);
 
-                half roughness = (1 - NormalRGB.b) * _Smoothness;
+                // half roughness = (1 - NormalRGB.b) * _Smoothness;
+                // roughness = max(roughness,0.001f);
+                // half metallic = NormalRGB.a * _Metallic;
+
+            	half roughness = 1 - _Smoothness;
                 roughness = max(roughness,0.001f);
-                half metallic = NormalRGB.a * _Metallic;
+                half metallic = _Metallic;
+            	
                 //BRDF
                 half3 diffuseColor = lerp(baseColor * _BaseColor, float3(0.0,0.0,0.0), metallic);
                 half3 specularColor = lerp(float3(0.04,0.04,0.04), baseColor, metallic);
