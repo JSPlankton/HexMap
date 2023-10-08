@@ -58,3 +58,4 @@ MonoBehaviour:
   noiseSource: {fileID: 2800000, guid: 6fb939df51fbf7d46b1fed785da7140a, type: 3}
   unitPrefab: {fileID: 2590242761581195065, guid: 6e88854799548fe40a74cf07d3d87b0b,
     type: 3}
+  wrapping: 1

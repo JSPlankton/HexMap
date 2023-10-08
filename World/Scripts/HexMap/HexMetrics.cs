@@ -8,7 +8,9 @@ namespace JS.HexMap
         //六边形外径
         public const float outerRadius = 10f;
         //六边形内径
-        public const float innerRadius = outerRadius * 0.866025404f;
+        public const float innerRadius = outerRadius * outerToInner;
+        //六边形直径
+        public const float innerDiameter = innerRadius * 2f;
         
         public const float solidFactor = 0.8f;
 	
@@ -63,6 +65,14 @@ namespace JS.HexMap
         public const float wallTowerThreshold = 0.5f;
         
         public const float bridgeDesignLength = 7f;
+        
+        public static int wrapSize;
+
+        public static bool Wrapping {
+            get {
+                return wrapSize > 0;
+            }
+        }
 
         #region 散列表
 
@@ -107,10 +117,20 @@ namespace JS.HexMap
         
 
         public static Vector4 SampleNoise (Vector3 position) {
-            return noiseSource.GetPixelBilinear(
+            Vector4 sample = noiseSource.GetPixelBilinear(
                 position.x * noiseScale,
                 position.z * noiseScale
             );
+            if (Wrapping && position.x < innerDiameter * 1.5f) {
+                Vector4 sample2 = noiseSource.GetPixelBilinear(
+                    (position.x + wrapSize * innerDiameter) * noiseScale,
+                    position.z * noiseScale
+                );
+                sample = Vector4.Lerp(
+                    sample2, sample, position.x * (1f / innerDiameter) - 0.5f
+                );
+            }
+            return sample;
         }
 	
         public static Vector3 TerraceLerp (Vector3 a, Vector3 b, int step) {

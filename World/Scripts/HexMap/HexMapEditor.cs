@@ -41,8 +41,8 @@ namespace JS.HexMap
             ShowGrid(false);
             SetEditCompState(false);
             
-            terrainMaterial.DisableKeyword("GRID_ON");
-            Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+            terrainMaterial.DisableKeyword("_SHOW_GRID");
+            Shader.EnableKeyword("_HEX_MAP_EDIT_MODE");
 
         }
 
@@ -233,22 +233,23 @@ namespace JS.HexMap
         {
             if (visible)
             {
-                terrainMaterial.EnableKeyword("GRID_ON");
+                terrainMaterial.EnableKeyword("_SHOW_GRID");
             }
             else
             {
-                terrainMaterial.DisableKeyword("GRID_ON");
+                terrainMaterial.DisableKeyword("_SHOW_GRID");
             }
         }
         
         public void SetEditMode (bool toggle)
         {
-            // enabled = toggle;
+            enabled = toggle;
             SetEditCompState(toggle);
         }
 
         private void SetEditCompState(bool state)
         {
+            enabled = state;
             foreach (var editComp in EditComp)
             {
                 editComp.SetActive(state);

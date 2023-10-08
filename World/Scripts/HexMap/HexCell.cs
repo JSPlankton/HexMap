@@ -11,6 +11,7 @@ namespace JS.HexMap
         public HexCoordinates coordinates;
         public RectTransform uiRect;
         public HexGridChunk chunk;
+        public int ColumnIndex { get; set; }
         public bool IsVisible {
             get {
                 return visibility > 0 && Explorable;
