@@ -6,6 +6,15 @@ namespace JS.HexMap
 {
     public class HexFeatureManager : MonoBehaviour
     {
+        [System.Serializable]
+        public struct HexFeatureCollection {
+
+            public Transform[] prefabs;
+
+            public Transform Pick (float choice) {
+                return prefabs[(int)(choice * prefabs.Length)];
+            }
+        }
         public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
         public HexMesh walls;
         public Transform wallTower, bridge;

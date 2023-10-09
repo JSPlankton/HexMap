@@ -1,5 +1,4 @@
-﻿#include "../Library/HexMetrics.hlsl"
-
+﻿
 float Foam (float shore, float2 worldXZ, float time, UnityTexture2D noiseTex) {
 	shore = sqrt(shore) * 0.9;
 

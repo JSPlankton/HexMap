@@ -6,6 +6,8 @@ namespace JS.HexMap
 {
     public class HexCellShaderData : MonoBehaviour
     {
+        bool[] visibilityTransitions;
+        
         Texture2D cellTexture;
         Color32[] cellTextureData;
         
@@ -38,10 +40,12 @@ namespace JS.HexMap
         
             if (cellTextureData == null || cellTextureData.Length != x * z) {
                 cellTextureData = new Color32[x * z];
+                visibilityTransitions = new bool[x * z];
             }
             else {
                 for (int i = 0; i < cellTextureData.Length; i++) {
                     cellTextureData[i] = new Color32(0, 0, 0, 0);
+                    visibilityTransitions[i] = false;
                 }
             }
             
@@ -50,7 +54,10 @@ namespace JS.HexMap
         }
     
         public void RefreshTerrain (HexCell cell) {
-            cellTextureData[cell.Index].a = (byte)cell.TerrainTypeIndex;
+            Color32 data = cellTextureData[cell.Index];
+            data.b = cell.IsUnderwater ? (byte)(cell.WaterSurfaceY * (255f / 30f)) : (byte)0;
+            data.a = (byte)cell.TerrainTypeIndex;
+            cellTextureData[cell.Index] = data;
             enabled = true;
         }
         
@@ -60,8 +67,8 @@ namespace JS.HexMap
                 cellTextureData[index].r = cell.IsVisible ? (byte)255 : (byte)0;
                 cellTextureData[index].g = cell.IsExplored ? (byte)255 : (byte)0;
             }
-            else if (cellTextureData[index].b != 255) {
-                cellTextureData[index].b = 255;
+            else if (!visibilityTransitions[index]) {
+                visibilityTransitions[index] = true;
                 transitioningCells.Add(cell);
             }
             enabled = true;
@@ -92,20 +99,22 @@ namespace JS.HexMap
             }
             
             if (!stillUpdating) {
-                data.b = 0;
+                visibilityTransitions[index] = false;
             }
             cellTextureData[index] = data;
             return stillUpdating;
         }
         
-        public void ViewElevationChanged () {
+        public void ViewElevationChanged (HexCell cell) {
+            cellTextureData[cell.Index].b = cell.IsUnderwater ?
+                (byte)(cell.WaterSurfaceY * (255f / 30f)) : (byte)0;
             needsVisibilityReset = true;
             enabled = true;
         }
         
         public void SetMapData (HexCell cell, float data) {
             cellTextureData[cell.Index].b =
-                data < 0f ? (byte)0 : (data < 1f ? (byte)(data * 254f) : (byte)254);
+                data < 0f ? (byte)0 : (data < 1f ? (byte)(data * 255f) : (byte)255);
             enabled = true;
         }
         

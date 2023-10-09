@@ -73,11 +73,11 @@ namespace JS.HexMap
             Vector3 position = transform.localPosition;
             position += direction * distance;
             transform.localPosition =
-                grid.wrapping ? WrapPosition(position) : ClampPosition(position);
+                grid.Wrapping ? WrapPosition(position) : ClampPosition(position);
         }
         
         Vector3 WrapPosition (Vector3 position) {
-            float width = grid.cellCountX * HexMetrics.innerDiameter;
+            float width = grid.CellCountX * HexMetrics.innerDiameter;
             while (position.x < 0f) {
                 position.x += width;
             }
@@ -85,7 +85,7 @@ namespace JS.HexMap
                 position.x -= width;
             }
 
-            float zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
+            float zMax = (grid.CellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
             position.z = Mathf.Clamp(position.z, 0f, zMax);
 
             grid.CenterMap(position.x);
@@ -94,10 +94,10 @@ namespace JS.HexMap
         
         Vector3 ClampPosition (Vector3 position) 
         {
-            float xMax = (grid.cellCountX - 0.5f) * HexMetrics.innerDiameter;
+            float xMax = (grid.CellCountX - 0.5f) * HexMetrics.innerDiameter;
             position.x = Mathf.Clamp(position.x, 0f, xMax);
 
-            float zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
+            float zMax = (grid.CellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
             position.z = Mathf.Clamp(position.z, 0f, zMax);
 
             return position;

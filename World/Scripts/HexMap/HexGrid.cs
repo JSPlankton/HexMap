@@ -9,7 +9,19 @@ namespace JS.HexMap
 {
     public class HexGrid : MonoBehaviour
     {
-        public int cellCountX = 20, cellCountZ = 15;
+        /// <summary>
+        /// Amount of cells in the X dimension.
+        /// </summary>
+        public int CellCountX { get; private set; }
+        /// <summary>
+        /// Amount of cells in the Z dimension.
+        /// </summary>
+        public int CellCountZ { get; private set; }
+        /// <summary>
+        /// Whether east-west Wrapping is enabled.
+        /// </summary>
+        public bool Wrapping { get; private set; }
+        
         public int chunkCountX, chunkCountZ;
 
         public HexCell cellPrefab;
@@ -33,7 +45,6 @@ namespace JS.HexMap
         public HexUnit unitPrefab;
         
         HexCellShaderData cellShaderData;
-        public bool wrapping;
         //单元格按列分组
         Transform[] columns;
         //当前中心列索引
@@ -46,12 +57,14 @@ namespace JS.HexMap
         }
 
         void Awake () {
+            CellCountX = 20;
+            CellCountZ = 15;
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
             HexUnit.unitPrefab = unitPrefab;
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
-            CreateMap(cellCountX, cellCountZ, wrapping);
+            CreateMap(CellCountX, CellCountZ, Wrapping);
         }
         
         void OnEnable () {
@@ -59,12 +72,12 @@ namespace JS.HexMap
                 HexMetrics.noiseSource = noiseSource;
                 HexMetrics.InitializeHashGrid(seed);
                 HexUnit.unitPrefab = unitPrefab;
-                HexMetrics.wrapSize = wrapping ? cellCountX : 0;
+                HexMetrics.wrapSize = Wrapping ? CellCountX : 0;
                 ResetVisibility();
             }
         }
         
-        public bool CreateMap (int x, int z, bool wrapping) {
+        public bool CreateMap (int x, int z, bool Wrapping) {
             if (
                 x <= 0 || x % HexMetrics.chunkSizeX != 0 ||
                 z <= 0 || z % HexMetrics.chunkSizeZ != 0
@@ -81,14 +94,14 @@ namespace JS.HexMap
                 }
             }
 
-            cellCountX = x;
-            cellCountZ = z;
-            this.wrapping = wrapping;
+            CellCountX = x;
+            CellCountZ = z;
+            this.Wrapping = Wrapping;
             currentCenterColumnIndex = -1;
-            HexMetrics.wrapSize = wrapping ? cellCountX : 0;
-            chunkCountX = cellCountX / HexMetrics.chunkSizeX;
-            chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
-            cellShaderData.Initialize(cellCountX, cellCountZ);
+            HexMetrics.wrapSize = Wrapping ? CellCountX : 0;
+            chunkCountX = CellCountX / HexMetrics.chunkSizeX;
+            chunkCountZ = CellCountZ / HexMetrics.chunkSizeZ;
+            cellShaderData.Initialize(CellCountX, CellCountZ);
             CreateChunks();
             CreateCells();
             
@@ -130,10 +143,10 @@ namespace JS.HexMap
         }
         
         void CreateCells () {
-            cells = new HexCell[cellCountZ * cellCountX];
+            cells = new HexCell[CellCountZ * CellCountX];
 
-            for (int z = 0, i = 0; z < cellCountZ; z++) {
-                for (int x = 0; x < cellCountX; x++) {
+            for (int z = 0, i = 0; z < CellCountZ; z++) {
+                for (int x = 0; x < CellCountX; x++) {
                     CreateCell(x, z, i++);
                 }
             }
@@ -164,43 +177,43 @@ namespace JS.HexMap
 
             HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
             cell.transform.localPosition = position;
-            cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.Index = i;
             cell.ColumnIndex = x / HexMetrics.chunkSizeX;
             cell.ShaderData = cellShaderData;
             
-            if (wrapping) {
-                cell.Explorable = z > 0 && z < cellCountZ - 1;
+            if (Wrapping) {
+                cell.Explorable = z > 0 && z < CellCountZ - 1;
             }
             else {
                 cell.Explorable =
-                    x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
+                    x > 0 && z > 0 && x < CellCountX - 1 && z < CellCountZ - 1;
             }
 
             if (x > 0) {
                 cell.SetNeighbor(HexDirection.W, cells[i - 1]);
-                if (wrapping && x == cellCountX - 1) {
+                if (Wrapping && x == CellCountX - 1) {
                     cell.SetNeighbor(HexDirection.E, cells[i - x]);
                 }
             }
             if (z > 0) {
                 if ((z & 1) == 0) {
-                    cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX]);
+                    cell.SetNeighbor(HexDirection.SE, cells[i - CellCountX]);
                     if (x > 0) {
-                        cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
+                        cell.SetNeighbor(HexDirection.SW, cells[i - CellCountX - 1]);
                     }
-                    else if (wrapping) {
+                    else if (Wrapping) {
                         cell.SetNeighbor(HexDirection.SW, cells[i - 1]);
                     }
                 }
                 else {
-                    cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
-                    if (x < cellCountX - 1) {
-                        cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
+                    cell.SetNeighbor(HexDirection.SW, cells[i - CellCountX]);
+                    if (x < CellCountX - 1) {
+                        cell.SetNeighbor(HexDirection.SE, cells[i - CellCountX + 1]);
                     }
-                    else if (wrapping) {
+                    else if (Wrapping) {
                         cell.SetNeighbor(
-                            HexDirection.SE, cells[i - cellCountX * 2 + 1]
+                            HexDirection.SE, cells[i - CellCountX * 2 + 1]
                         );
                     }
                 }
@@ -209,8 +222,8 @@ namespace JS.HexMap
             TextMeshProUGUI label = Instantiate<TextMeshProUGUI>(cellLabelPrefab);
             label.rectTransform.anchoredPosition =
                 new Vector2(position.x, position.z);
-            // label.text = cell.coordinates.ToStringOnSeparateLines();
-            cell.uiRect = label.rectTransform;
+            // label.text = cell.Coordinates.ToStringOnSeparateLines();
+            cell.UIRect = label.rectTransform;
             
             cell.Elevation = 0;
             
@@ -229,25 +242,25 @@ namespace JS.HexMap
         
         public HexCell GetCell (Vector3 position) {
             position = transform.InverseTransformPoint(position);
-            HexCoordinates coordinates = HexCoordinates.FromPosition(position);
-            int index = coordinates.X + coordinates.Z * cellCountX + coordinates.Z / 2;
+            HexCoordinates Coordinates = HexCoordinates.FromPosition(position);
+            int index = Coordinates.X + Coordinates.Z * CellCountX + Coordinates.Z / 2;
             return cells[index];
         }
         
-        public HexCell GetCell (HexCoordinates coordinates) {
-            int z = coordinates.Z;
-            if (z < 0 || z >= cellCountZ) {
+        public HexCell GetCell (HexCoordinates Coordinates) {
+            int z = Coordinates.Z;
+            if (z < 0 || z >= CellCountZ) {
                 return null;
             }
-            int x = coordinates.X + z / 2;
-            if (x < 0 || x >= cellCountX) {
+            int x = Coordinates.X + z / 2;
+            if (x < 0 || x >= CellCountX) {
                 return null;
             }
-            return cells[x + z * cellCountX];
+            return cells[x + z * CellCountX];
         }
         
         public HexCell GetCell (int xOffset, int zOffset) {
-            return cells[xOffset + zOffset * cellCountX];
+            return cells[xOffset + zOffset * CellCountX];
         }
 	
         public HexCell GetCell (int cellIndex) {
@@ -261,9 +274,9 @@ namespace JS.HexMap
         }
         
         public void Save (BinaryWriter writer) {
-            writer.Write(cellCountX);
-            writer.Write(cellCountZ);
-            writer.Write(wrapping);
+            writer.Write(CellCountX);
+            writer.Write(CellCountZ);
+            writer.Write(Wrapping);
             for (int i = 0; i < cells.Length; i++) {
                 cells[i].Save(writer);
             }
@@ -281,9 +294,9 @@ namespace JS.HexMap
                 x = reader.ReadInt32();
                 z = reader.ReadInt32();
             }
-            bool wrapping = header >= 5 ? reader.ReadBoolean() : false;
-            if (x != cellCountX || z != cellCountZ || this.wrapping != wrapping) {
-                if (!CreateMap(x, z, wrapping)) {
+            bool Wrapping = header >= 5 ? reader.ReadBoolean() : false;
+            if (x != CellCountX || z != CellCountZ || this.Wrapping != Wrapping) {
+                if (!CreateMap(x, z, Wrapping)) {
                     return;
                 }
             }
@@ -418,7 +431,7 @@ namespace JS.HexMap
                         neighbor.Distance = distance;
                         neighbor.PathFrom = current;
                         neighbor.SearchHeuristic =
-                            neighbor.coordinates.DistanceTo(toCell.coordinates);
+                            neighbor.Coordinates.DistanceTo(toCell.Coordinates);
                         searchFrontier.Enqueue(neighbor);
                     }
                     else if (distance < neighbor.Distance) {
@@ -449,7 +462,7 @@ namespace JS.HexMap
             
             searchFrontier.Enqueue(fromCell);
             
-            HexCoordinates fromCoordinates = fromCell.coordinates;
+            HexCoordinates fromCoordinates = fromCell.Coordinates;
             while (searchFrontier.Count > 0)
             {
                 HexCell current = searchFrontier.Dequeue();
@@ -466,7 +479,7 @@ namespace JS.HexMap
                     
                     int distance = current.Distance + 1;
                     if (distance + neighbor.ViewElevation > range ||
-                        distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
+                        distance > fromCoordinates.DistanceTo(neighbor.Coordinates)) {
                         continue;
                     }
 

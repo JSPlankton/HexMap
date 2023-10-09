@@ -4,9 +4,6 @@
     "m_ObjectId": "6e291edf8bec4637b5ec7ecc0806d362",
     "m_Properties": [
         {
-            "m_Id": "b982f80530424e0e8171a5f190f2b403"
-        },
-        {
             "m_Id": "7392f470da274c4a8bcb5feae3356b09"
         },
         {
@@ -96,9 +93,6 @@
         },
         {
             "m_Id": "3dda92c3552b47519ab7c559605f7f02"
-        },
-        {
-            "m_Id": "b2ecb4d853c44f0a865bb67ff5ff0c1a"
         },
         {
             "m_Id": "640363119f554cd9a177b270f2c96d56"
@@ -332,20 +326,6 @@
             "m_InputSlot": {
                 "m_Node": {
                     "m_Id": "359aea5e840349ffaf2c8200b7527135"
-                },
-                "m_SlotId": 0
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "b2ecb4d853c44f0a865bb67ff5ff0c1a"
-                },
-                "m_SlotId": 0
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "b62123336cf7485aa37ddb70f6ec74aa"
                 },
                 "m_SlotId": 0
             }
@@ -940,19 +920,6 @@
         "m_SerializableColors": []
     },
     "m_SerializedDescriptor": "VertexDescription.Position"
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
-    "m_ObjectId": "2d2820df184a4ed4934083e529156551",
-    "m_Id": 0,
-    "m_DisplayName": "Grid Coordinates Texture",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 3,
-    "m_BareResource": false
 }
 
 {
@@ -2170,42 +2137,6 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
-    "m_ObjectId": "b2ecb4d853c44f0a865bb67ff5ff0c1a",
-    "m_Group": {
-        "m_Id": ""
-    },
-    "m_Name": "Property",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": -229.99993896484376,
-            "y": -6.0,
-            "width": 215.49993896484376,
-            "height": 33.999969482421878
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "2d2820df184a4ed4934083e529156551"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_Property": {
-        "m_Id": "b982f80530424e0e8171a5f190f2b403"
-    }
-}
-
-{
-    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "b3463165e14e486c971f174d07eff957",
     "m_Id": 0,
@@ -2291,16 +2222,13 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 31.99995994567871,
-            "y": 28.000015258789064,
-            "width": 279.00006103515627,
-            "height": 142.00001525878907
+            "x": 47.99997329711914,
+            "y": 40.999996185302737,
+            "width": 279.0,
+            "height": 142.0
         }
     },
     "m_Slots": [
-        {
-            "m_Id": "d030c7690aea48ca8f3c73400ad3e226"
-        },
         {
             "m_Id": "f05329b1aed54d92bab7e21a74309e01"
         },
@@ -2326,36 +2254,6 @@
     "m_FunctionName": "GetVertexCellData",
     "m_FunctionSource": "832808d9a6bf5e942ae5bf66e1b96dbe",
     "m_FunctionBody": "Enter function body here..."
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
-    "m_ObjectId": "b982f80530424e0e8171a5f190f2b403",
-    "m_Guid": {
-        "m_GuidSerialized": "91d24a32-3700-4400-873b-32fdf9ed533a"
-    },
-    "m_Name": "Grid Coordinates Texture",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Grid Coordinates Texture",
-    "m_DefaultReferenceName": "_Grid_Coordinates_Texture",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": {
-        "m_SerializedTexture": "{\"texture\":{\"fileID\":2800000,\"guid\":\"d5f65631ce8514593b56a3bda8e081b1\",\"type\":3}}",
-        "m_Guid": ""
-    },
-    "isMainTexture": false,
-    "useTilingAndOffset": false,
-    "m_Modifiable": true,
-    "m_DefaultType": 0
 }
 
 {
@@ -2390,9 +2288,6 @@
         },
         {
             "m_Id": "e354d2f42731461195e0540d5ce5a6b6"
-        },
-        {
-            "m_Id": "b982f80530424e0e8171a5f190f2b403"
         },
         {
             "m_Id": "7392f470da274c4a8bcb5feae3356b09"
@@ -2545,24 +2440,6 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
-    "m_ObjectId": "d030c7690aea48ca8f3c73400ad3e226",
-    "m_Id": 0,
-    "m_DisplayName": "GridCoordinatesTexture",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "GridCoordinatesTexture",
-    "m_StageCapability": 3,
-    "m_BareResource": false,
-    "m_Texture": {
-        "m_SerializedTexture": "{\"texture\":{\"instanceID\":0}}",
-        "m_Guid": ""
-    },
-    "m_DefaultType": 0
 }
 
 {

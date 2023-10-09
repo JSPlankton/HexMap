@@ -112,7 +112,7 @@ namespace JS.HexMap
             new Biome(0, 0), new Biome(1, 1), new Biome(1, 2), new Biome(1, 3)
         };
         
-        public void GenerateMap(int x, int z, bool wrapping)
+        public void GenerateMap(int x, int z, bool Wrapping)
         {
             Random.State originalRandomState = Random.state;
             if (!useFixedSeed)
@@ -125,7 +125,7 @@ namespace JS.HexMap
             Random.InitState(seed);
             
             cellCount = x * z;
-            grid.CreateMap(x, z, wrapping);
+            grid.CreateMap(x, z, Wrapping);
             
             if (searchFrontier == null) {
                 searchFrontier = new HexCellPriorityQueue();
@@ -181,7 +181,7 @@ namespace JS.HexMap
             firstCell.Distance = 0;
             firstCell.SearchHeuristic = 0;
             searchFrontier.Enqueue(firstCell);
-            HexCoordinates center = firstCell.coordinates;
+            HexCoordinates center = firstCell.Coordinates;
             
             int rise = Random.value < highRiseProbability ? 2 : 1;
             int size = 0;
@@ -206,7 +206,7 @@ namespace JS.HexMap
                     HexCell neighbor = current.GetNeighbor(d);
                     if (neighbor && neighbor.SearchPhase < searchFrontierPhase) {
                         neighbor.SearchPhase = searchFrontierPhase;
-                        neighbor.Distance = neighbor.coordinates.DistanceTo(center);
+                        neighbor.Distance = neighbor.Coordinates.DistanceTo(center);
                         neighbor.SearchHeuristic = Random.value < jitterProbability ? 1: 0;
                         searchFrontier.Enqueue(neighbor);
                     }
@@ -224,7 +224,7 @@ namespace JS.HexMap
             firstCell.Distance = 0;
             firstCell.SearchHeuristic = 0;
             searchFrontier.Enqueue(firstCell);
-            HexCoordinates center = firstCell.coordinates;
+            HexCoordinates center = firstCell.Coordinates;
             
             int sink = Random.value < highRiseProbability ? 2 : 1;
             int size = 0;
@@ -249,7 +249,7 @@ namespace JS.HexMap
                     HexCell neighbor = current.GetNeighbor(d);
                     if (neighbor && neighbor.SearchPhase < searchFrontierPhase) {
                         neighbor.SearchPhase = searchFrontierPhase;
-                        neighbor.Distance = neighbor.coordinates.DistanceTo(center);
+                        neighbor.Distance = neighbor.Coordinates.DistanceTo(center);
                         neighbor.SearchHeuristic = Random.value < jitterProbability ? 1: 0;
                         searchFrontier.Enqueue(neighbor);
                     }
@@ -497,71 +497,71 @@ namespace JS.HexMap
                 regions.Clear();
             }
 
-            int borderX = grid.wrapping ? regionBorder : mapBorderX;
+            int borderX = grid.Wrapping ? regionBorder : mapBorderX;
             MapRegion region;
             switch (regionCount) {
                 default:
-                    if (grid.wrapping) {
+                    if (grid.Wrapping) {
                         borderX = 0;
                     }
                     region.xMin = borderX;
-                    region.xMax = grid.cellCountX - borderX;
+                    region.xMax = grid.CellCountX - borderX;
                     region.zMin = mapBorderZ;
-                    region.zMax = grid.cellCountZ - mapBorderZ;
+                    region.zMax = grid.CellCountZ - mapBorderZ;
                     regions.Add(region);
                     break;
                 case 2:
                     if (Random.value < 0.5f) {
                         region.xMin = mapBorderX;
-                        region.xMax = grid.cellCountX / 2 - regionBorder;
+                        region.xMax = grid.CellCountX / 2 - regionBorder;
                         region.zMin = mapBorderZ;
-                        region.zMax = grid.cellCountZ - mapBorderZ;
+                        region.zMax = grid.CellCountZ - mapBorderZ;
                         regions.Add(region);
-                        region.xMin = grid.cellCountX / 2 + regionBorder;
-                        region.xMax = grid.cellCountX - mapBorderX;
+                        region.xMin = grid.CellCountX / 2 + regionBorder;
+                        region.xMax = grid.CellCountX - mapBorderX;
                         regions.Add(region);
                     }
                     else {
-                        if (grid.wrapping) {
+                        if (grid.Wrapping) {
                             borderX = 0;
                         }
                         region.xMin = borderX;
-                        region.xMax = grid.cellCountX - borderX;
+                        region.xMax = grid.CellCountX - borderX;
                         region.zMin = mapBorderZ;
-                        region.zMax = grid.cellCountZ / 2 - regionBorder;
+                        region.zMax = grid.CellCountZ / 2 - regionBorder;
                         regions.Add(region);
-                        region.zMin = grid.cellCountZ / 2 + regionBorder;
-                        region.zMax = grid.cellCountZ - mapBorderZ;
+                        region.zMin = grid.CellCountZ / 2 + regionBorder;
+                        region.zMax = grid.CellCountZ - mapBorderZ;
                         regions.Add(region);
                     }
                     break;
                 case 3:
                     region.xMin = mapBorderX;
-                    region.xMax = grid.cellCountX / 3 - regionBorder;
+                    region.xMax = grid.CellCountX / 3 - regionBorder;
                     region.zMin = mapBorderZ;
-                    region.zMax = grid.cellCountZ - mapBorderZ;
+                    region.zMax = grid.CellCountZ - mapBorderZ;
                     regions.Add(region);
-                    region.xMin = grid.cellCountX / 3 + regionBorder;
-                    region.xMax = grid.cellCountX * 2 / 3 - regionBorder;
+                    region.xMin = grid.CellCountX / 3 + regionBorder;
+                    region.xMax = grid.CellCountX * 2 / 3 - regionBorder;
                     regions.Add(region);
-                    region.xMin = grid.cellCountX * 2 / 3 + regionBorder;
-                    region.xMax = grid.cellCountX - mapBorderX;
+                    region.xMin = grid.CellCountX * 2 / 3 + regionBorder;
+                    region.xMax = grid.CellCountX - mapBorderX;
                     regions.Add(region);
                     break;
                 case 4:
                     region.xMin = mapBorderX;
-                    region.xMax = grid.cellCountX / 2 - regionBorder;
+                    region.xMax = grid.CellCountX / 2 - regionBorder;
                     region.zMin = mapBorderZ;
-                    region.zMax = grid.cellCountZ / 2 - regionBorder;
+                    region.zMax = grid.CellCountZ / 2 - regionBorder;
                     regions.Add(region);
-                    region.xMin = grid.cellCountX / 2 + regionBorder;
-                    region.xMax = grid.cellCountX - mapBorderX;
+                    region.xMin = grid.CellCountX / 2 + regionBorder;
+                    region.xMax = grid.CellCountX - mapBorderX;
                     regions.Add(region);
-                    region.zMin = grid.cellCountZ / 2 + regionBorder;
-                    region.zMax = grid.cellCountZ - mapBorderZ;
+                    region.zMin = grid.CellCountZ / 2 + regionBorder;
+                    region.zMax = grid.CellCountZ - mapBorderZ;
                     regions.Add(region);
                     region.xMin = mapBorderX;
-                    region.xMax = grid.cellCountX / 2 - regionBorder;
+                    region.xMax = grid.CellCountX / 2 - regionBorder;
                     regions.Add(region);
                     break;
             }
@@ -736,7 +736,7 @@ namespace JS.HexMap
         }
         
         float DetermineTemperature (HexCell cell) {
-            float latitude = (float)cell.coordinates.Z / grid.cellCountZ;
+            float latitude = (float)cell.Coordinates.Z / grid.CellCountZ;
             if (hemisphere == HemisphereMode.Both) {
                 latitude *= 2f;
                 if (latitude > 1f) {

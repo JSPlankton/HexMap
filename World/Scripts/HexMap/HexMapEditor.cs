@@ -23,6 +23,8 @@ namespace JS.HexMap
 
         public GameObject[] EditComp;
         public RectTransform Panel;
+        
+        static int cellHighlightingId = Shader.PropertyToID("_CellHighlighting");
 
 
         //河流编辑模式
@@ -52,6 +54,10 @@ namespace JS.HexMap
                     HandleInput();
                     return;
                 }
+                else {
+                    // Potential optimization: only do this if camera or cursor has changed.
+                    UpdateCellHighlightData(GetCellUnderCursor());
+                }
                 if (Input.GetKeyDown(KeyCode.U)) {
                     if (Input.GetKey(KeyCode.LeftShift)) {
                         DestroyUnit();
@@ -61,6 +67,9 @@ namespace JS.HexMap
                     }
                     return;
                 }
+            }
+            else {
+                ClearCellHighlightData();
             }
             previousCell = null;
         }
@@ -83,6 +92,8 @@ namespace JS.HexMap
             else {
                 previousCell = null;
             }
+            
+            UpdateCellHighlightData(currentCell);
         }
         
         void ValidateDrag (HexCell currentCell) {
@@ -155,8 +166,8 @@ namespace JS.HexMap
         
         void EditCells (HexCell center) 
         {
-            int centerX = center.coordinates.X;
-            int centerZ = center.coordinates.Z;
+            int centerX = center.Coordinates.X;
+            int centerZ = center.Coordinates.Z;
             
             for (int r = 0, z = centerZ - brushSize; z <= centerZ; z++, r++) {
                 for (int x = centerX - r; x <= centerX + brushSize; x++) {
@@ -294,6 +305,27 @@ namespace JS.HexMap
                 hexGrid.RemoveUnit(cell.Unit);
             }
         }
+        
+        void UpdateCellHighlightData (HexCell cell) {
+            if (cell == null) {
+                ClearCellHighlightData();
+                return;
+            }
+
+            // Works up to brush size 6.
+            Shader.SetGlobalVector(
+                cellHighlightingId,
+                new Vector4(
+                    cell.Coordinates.HexX,
+                    cell.Coordinates.HexZ,
+                    brushSize * brushSize + 0.5f,
+                    HexMetrics.wrapSize
+                )
+            );
+        }
+
+        void ClearCellHighlightData () =>
+            Shader.SetGlobalVector(cellHighlightingId, new Vector4(0f, 0f, -1f, 0f));
 
     }
 }

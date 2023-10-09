@@ -7,9 +7,6 @@
             "m_Id": "7a7dce24c3c34f70bc1ae82a4fc3fc1f"
         },
         {
-            "m_Id": "b982f80530424e0e8171a5f190f2b403"
-        },
-        {
             "m_Id": "7392f470da274c4a8bcb5feae3356b09"
         },
         {
@@ -57,9 +54,6 @@
         },
         {
             "m_Id": "b1ee84e0fdce4975a4ef2ec7649c79b0"
-        },
-        {
-            "m_Id": "2348bd6fe04e4ad4b55374167c49d997"
         },
         {
             "m_Id": "3e6f5f1ac8854d99a6977df721e56991"
@@ -129,6 +123,9 @@
         },
         {
             "m_Id": "2bb84262af414d47a6cd78bf190e3ccf"
+        },
+        {
+            "m_Id": "abcfe6a25a52421d95ed81c01ddc9eec"
         }
     ],
     "m_GroupDatas": [],
@@ -254,20 +251,6 @@
                     "m_Id": "b62123336cf7485aa37ddb70f6ec74aa"
                 },
                 "m_SlotId": 1
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "2348bd6fe04e4ad4b55374167c49d997"
-                },
-                "m_SlotId": 0
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "0b1069e95d4e4ae28f42233e1c29d45d"
-                },
-                "m_SlotId": 8
             }
         },
         {
@@ -633,16 +616,13 @@
             "m_Id": "0f0c62ff13ed4754a8be2ece53f3dbf7"
         },
         {
-            "m_Id": "f007ed8c325b42c398f6d0bb91c7e807"
+            "m_Id": "239593337f4b454687289037dc0ae15a"
         },
         {
             "m_Id": "ee4199db304e40259bf1e26b410ed1e8"
         },
         {
             "m_Id": "c246e0e694f042e0b61be5a8a4d8cd54"
-        },
-        {
-            "m_Id": "bc77ef5a77a3497f9968942dec9d6f07"
         },
         {
             "m_Id": "6646bab66e0f4340bdeeb73303896f28"
@@ -692,19 +672,6 @@
         "z": 0.0
     },
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
-    "m_ObjectId": "1095ff987f7d436fa8664092c2012eda",
-    "m_Id": 0,
-    "m_DisplayName": "Grid Texture",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 3,
-    "m_BareResource": false
 }
 
 {
@@ -989,38 +956,27 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
-    "m_ObjectId": "2348bd6fe04e4ad4b55374167c49d997",
-    "m_Group": {
-        "m_Id": ""
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_ObjectId": "239593337f4b454687289037dc0ae15a",
+    "m_Id": 1,
+    "m_DisplayName": "Terrain",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Terrain",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
     },
-    "m_Name": "Property",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": -561.5000610351563,
-            "y": 817.0000610351563,
-            "width": 149.00006103515626,
-            "height": 33.99993896484375
-        }
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
     },
-    "m_Slots": [
-        {
-            "m_Id": "1095ff987f7d436fa8664092c2012eda"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_Property": {
-        "m_Id": "b982f80530424e0e8171a5f190f2b403"
-    }
+    "m_Labels": []
 }
 
 {
@@ -1392,7 +1348,7 @@
     },
     "m_Slots": [
         {
-            "m_Id": "faf7a315a9c7479ea1c6173a490402cc"
+            "m_Id": "3ff7b67c54fa4b9dafdb797416fcb427"
         }
     ],
     "synonyms": [],
@@ -1404,7 +1360,7 @@
         "m_SerializableColors": []
     },
     "customBlockNodeName": "Terrain",
-    "serializedType": 3
+    "serializedType": 4
 }
 
 {
@@ -1576,6 +1532,31 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_ObjectId": "3ff7b67c54fa4b9dafdb797416fcb427",
+    "m_Id": 0,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 2,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicValueMaterialSlot",
     "m_ObjectId": "40b77c3a57ad48a6a182a46f0a5838b3",
     "m_Id": 1,
@@ -1733,6 +1714,31 @@
     "m_Entries": [],
     "m_Value": 0,
     "m_IsEditable": true
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_ObjectId": "53384501a99443cba2258093d4c2844e",
+    "m_Id": 0,
+    "m_DisplayName": "Terrain",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Terrain",
+    "m_StageCapability": 1,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_Labels": []
 }
 
 {
@@ -2502,6 +2508,19 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
+    "m_ObjectId": "99c423ca751e4b90b8ef7a9120a86f83",
+    "m_Id": 0,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_BareResource": false
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "9c8d224fe065454d8f71176972a4c937",
     "m_Group": {
@@ -2655,6 +2674,43 @@
         "m_SerializableColors": []
     },
     "m_ComparisonType": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Texture2DAssetNode",
+    "m_ObjectId": "abcfe6a25a52421d95ed81c01ddc9eec",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Texture 2D Asset",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -561.5000610351563,
+            "y": 817.0000610351563,
+            "width": 149.00006103515626,
+            "height": 33.99993896484375
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "99c423ca751e4b90b8ef7a9120a86f83"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Texture": {
+        "m_SerializedTexture": "{\"texture\":{\"instanceID\":0}}",
+        "m_Guid": ""
+    }
 }
 
 {
@@ -2826,12 +2882,6 @@
     },
     "m_Slots": [
         {
-            "m_Id": "e94254b882c3463eadae0ba213af6707"
-        },
-        {
-            "m_Id": "22785fb5ec8c45ebbf925a1aeec8017e"
-        },
-        {
             "m_Id": "ba5a96807e9c46bf8b8debac13b0f703"
         },
         {
@@ -2839,6 +2889,12 @@
         },
         {
             "m_Id": "c1f9a5d6ffb6401692463ffe60492b58"
+        },
+        {
+            "m_Id": "d96e2fbd4250493895cc3c48e97d6540"
+        },
+        {
+            "m_Id": "22785fb5ec8c45ebbf925a1aeec8017e"
         }
     ],
     "synonyms": [
@@ -2856,36 +2912,6 @@
     "m_FunctionName": "GetVertexCellData",
     "m_FunctionSource": "f7b1636ca2ff6b84d9d0c129054552a8",
     "m_FunctionBody": "Enter function body here..."
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
-    "m_ObjectId": "b982f80530424e0e8171a5f190f2b403",
-    "m_Guid": {
-        "m_GuidSerialized": "91d24a32-3700-4400-873b-32fdf9ed533a"
-    },
-    "m_Name": "Grid Texture",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Grid Texture",
-    "m_DefaultReferenceName": "_Grid_Texture",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": {
-        "m_SerializedTexture": "{\"texture\":{\"fileID\":2800000,\"guid\":\"272d434299ddd45a9963d243eb268b88\",\"type\":3}}",
-        "m_Guid": ""
-    },
-    "isMainTexture": false,
-    "useTilingAndOffset": false,
-    "m_Modifiable": true,
-    "m_DefaultType": 0
 }
 
 {
@@ -2909,24 +2935,6 @@
         "z": 0.0
     },
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
-    "m_ObjectId": "bc77ef5a77a3497f9968942dec9d6f07",
-    "m_Id": 8,
-    "m_DisplayName": "GridTexture",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "GridTexture",
-    "m_StageCapability": 3,
-    "m_BareResource": false,
-    "m_Texture": {
-        "m_SerializedTexture": "{\"texture\":{\"instanceID\":0}}",
-        "m_Guid": ""
-    },
-    "m_DefaultType": 0
 }
 
 {
@@ -2961,9 +2969,6 @@
     "m_ChildObjectList": [
         {
             "m_Id": "7a7dce24c3c34f70bc1ae82a4fc3fc1f"
-        },
-        {
-            "m_Id": "b982f80530424e0e8171a5f190f2b403"
         },
         {
             "m_Id": "7392f470da274c4a8bcb5feae3356b09"
@@ -3065,7 +3070,7 @@
     },
     "m_Slots": [
         {
-            "m_Id": "fac98f6e51494f22a7abc67c23744c1b"
+            "m_Id": "53384501a99443cba2258093d4c2844e"
         }
     ],
     "synonyms": [],
@@ -3076,7 +3081,7 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     },
-    "m_SerializedDescriptor": "VertexDescription.Terrain#3"
+    "m_SerializedDescriptor": "VertexDescription.Terrain#4"
 }
 
 {
@@ -3186,6 +3191,31 @@
     "m_ShaderOutputName": "Out",
     "m_StageCapability": 3,
     "m_BareResource": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_ObjectId": "d96e2fbd4250493895cc3c48e97d6540",
+    "m_Id": 3,
+    "m_DisplayName": "Terrain",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Terrain",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_Labels": []
 }
 
 {
@@ -3312,29 +3342,6 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "e94254b882c3463eadae0ba213af6707",
-    "m_Id": 3,
-    "m_DisplayName": "Terrain",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Terrain",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ea735d3842894cffbc69994a718820be",
     "m_Id": 1,
@@ -3369,29 +3376,6 @@
         "y": 0.0,
         "z": 0.0,
         "w": 0.0
-    },
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "f007ed8c325b42c398f6d0bb91c7e807",
-    "m_Id": 1,
-    "m_DisplayName": "Terrain",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Terrain",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
     },
     "m_Labels": []
 }
@@ -3547,52 +3531,6 @@
         "z": 0.0,
         "w": 0.0
     }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "fac98f6e51494f22a7abc67c23744c1b",
-    "m_Id": 0,
-    "m_DisplayName": "Terrain",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Terrain",
-    "m_StageCapability": 1,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "faf7a315a9c7479ea1c6173a490402cc",
-    "m_Id": 0,
-    "m_DisplayName": "Out",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 2,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
 }
 
 {

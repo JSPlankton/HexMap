@@ -25,6 +25,10 @@ namespace JS.HexMap
                 return -X - Z;
             }
         }
+        
+        public float HexX => X + Z / 2 + ((Z & 1) == 0 ? 0f : 0.5f);
+
+        public float HexZ => Z * HexMetrics.outerToInner;
     
         public HexCoordinates (int x, int z) {
             if (HexMetrics.Wrapping) {

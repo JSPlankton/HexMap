@@ -8,9 +8,9 @@ namespace JS.HexMap
 {
     public class HexCell : MonoBehaviour
     {
-        public HexCoordinates coordinates;
-        public RectTransform uiRect;
-        public HexGridChunk chunk;
+        public HexCoordinates Coordinates { get; set; }
+        public RectTransform UIRect { get; set; }
+        public HexGridChunk Chunk { get; set; }
         public int ColumnIndex { get; set; }
         public bool IsVisible {
             get {
@@ -121,11 +121,8 @@ namespace JS.HexMap
                 if (elevation == value) {
                     return;
                 }
-                int originalViewElevation = ViewElevation;
                 elevation = value;
-                if (ViewElevation != originalViewElevation) {
-                    ShaderData.ViewElevationChanged();
-                }
+                ShaderData.ViewElevationChanged(this);
                 RefreshPosition();
                 ValidateRivers();
                 //如果单元格高度差过大，需要切断道路
@@ -147,9 +144,9 @@ namespace JS.HexMap
                 HexMetrics.elevationPerturbStrength;
             transform.localPosition = position;
 
-            Vector3 uiPosition = uiRect.localPosition;
+            Vector3 uiPosition = UIRect.localPosition;
             uiPosition.z = -position.y;
-            uiRect.localPosition = uiPosition;
+            UIRect.localPosition = uiPosition;
         }
         
         //海拔高度等级
@@ -164,11 +161,8 @@ namespace JS.HexMap
                 if (waterLevel == value) {
                     return;
                 }
-                int originalViewElevation = ViewElevation;
                 waterLevel = value;
-                if (ViewElevation != originalViewElevation) {
-                    ShaderData.ViewElevationChanged();
-                }
+                ShaderData.ViewElevationChanged(this);
                 ValidateRivers();
                 Refresh();
             }
@@ -461,13 +455,13 @@ namespace JS.HexMap
 
         void Refresh()
         {
-            if (chunk)
+            if (Chunk)
             {
-                chunk.Refresh();
+                Chunk.Refresh();
                 for (int i = 0; i < neighbors.Length; i++) {
                     HexCell neighbor = neighbors[i];
-                    if (neighbor != null && neighbor.chunk != chunk) {
-                        neighbor.chunk.Refresh();
+                    if (neighbor != null && neighbor.Chunk != Chunk) {
+                        neighbor.Chunk.Refresh();
                     }
                 }
                 if (Unit) {
@@ -477,7 +471,7 @@ namespace JS.HexMap
         }
         
         void RefreshSelfOnly () {
-            chunk.Refresh();
+            Chunk.Refresh();
             if (Unit) {
                 Unit.ValidateLocation();
             }
@@ -540,7 +534,6 @@ namespace JS.HexMap
 
         public void Load (BinaryReader reader, int header) {
             terrainTypeIndex = reader.ReadByte();
-            ShaderData.RefreshTerrain(this);
             elevation = reader.ReadByte();
             if (header >= 4) {
                 elevation -= 127;
@@ -577,23 +570,24 @@ namespace JS.HexMap
             }
             
             IsExplored = header >= 3 ? reader.ReadBoolean() : false;
+            ShaderData.RefreshTerrain(this);
             ShaderData.RefreshVisibility(this);
         }
         
         public void SetLabel (string text) {
-            if (uiRect.TryGetComponent(out TextMeshProUGUI textMeshProUGUI))
+            if (UIRect.TryGetComponent(out TextMeshProUGUI textMeshProUGUI))
             {
                 textMeshProUGUI.text = text;
             }
         }
 
         public void DisableHighlight () {
-            Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+            Image highlight = UIRect.GetChild(0).GetComponent<Image>();
             highlight.enabled = false;
         }
 	
         public void EnableHighlight (Color color) {
-            Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+            Image highlight = UIRect.GetChild(0).GetComponent<Image>();
             highlight.color = color;
             highlight.enabled = true;
         }
